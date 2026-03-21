@@ -622,6 +622,13 @@ input[type="date"]{cursor:pointer}
         </select>
       </div>
       <div class="form-group full"><label>Nota (opcional)</label><textarea id="sv-note" placeholder="Broker, wallet, plataforma..."></textarea></div>
+      <div class="form-group full" style="border-top:1px solid var(--border);padding-top:14px;margin-top:2px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;font-weight:500;letter-spacing:0">
+          <input type="checkbox" id="sv-from-income" style="width:16px;height:16px;cursor:pointer;accent-color:var(--text)">
+          Ya contabilizado como ingreso en transacciones
+        </label>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;padding-left:26px">Actívalo si este ahorro ya está anotado como ingreso, así no se sumará dos veces al patrimonio.</div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-savings')">Cancelar</button>
@@ -925,14 +932,17 @@ function getDashBlock(id){
   const monthTx = transactions.filter(txInMonth);
   const totalIncome = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const totalExpense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  // Patrimonio real-time (ahorros + todos los ingresos - todos los gastos - pagos vencidos + cobros vencidos)
-  const savingsTotal = savings.reduce((s,sv)=>s+sv.amount,0);
+  // Patrimonio real-time
+  // savingsExternal = ahorros que NO vienen de transacciones (dinero externo/previo)
+  // savingsFromIncome = ahorros ya contabilizados como ingreso (no se suman por separado)
+  const savingsExternal = savings.filter(sv=>!sv.fromIncome).reduce((s,sv)=>s+sv.amount,0);
+  const savingsTotal = savings.reduce((s,sv)=>s+sv.amount,0); // solo para mostrar en breakdown
   const allTxIncome = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const allTxExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const todayD = new Date(); todayD.setHours(12,0,0,0);
   const dueBills = bills.filter(b=>b.status==='pending'&&b.dueDate&&new Date(b.dueDate+'T12:00:00')<=todayD).reduce((s,b)=>s+b.amount,0);
   const dueExpected = expectedIncome.filter(e=>(e.status==='pending'||e.status==='overdue')&&e.expectedDate&&new Date(e.expectedDate+'T12:00:00')<=todayD).reduce((s,e)=>s+e.amount,0);
-  const patrimonioTotal = savingsTotal + allTxIncome - allTxExpense - dueBills + dueExpected;
+  const patrimonioTotal = savingsExternal + allTxIncome - allTxExpense - dueBills + dueExpected;
   switch(id){
     case 'patrimonio': {
       const today = new Date();
@@ -941,7 +951,7 @@ function getDashBlock(id){
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.55;margin-bottom:6px">Patrimonio total · ${dd}</div>
         <div style="font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1">${fmt(patrimonioTotal)}</div>
         <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;opacity:.6">
-          <span>💰 Ahorros ${fmt(savingsTotal)}</span>
+          ${savingsExternal>0?`<span>💰 Ahorro ext. ${fmt(savingsExternal)}</span>`:''}
           <span>📈 Ingresos ${fmt(allTxIncome)}</span>
           <span>📉 Gastos −${fmt(allTxExpense)}</span>
           ${dueBills>0?`<span>💳 Vencidos −${fmt(dueBills)}</span>`:''}
@@ -1544,12 +1554,14 @@ function openSavingsModal(id){
     document.getElementById('sv-amount').value=sv.amount;
     document.getElementById('sv-type').value=sv.type||'cuenta';
     document.getElementById('sv-note').value=sv.note||'';
+    document.getElementById('sv-from-income').checked=!!sv.fromIncome;
   } else {
     document.getElementById('sv-name').value='';
     document.getElementById('sv-emoji').value='';
     document.getElementById('sv-amount').value='';
     document.getElementById('sv-type').value='cuenta';
     document.getElementById('sv-note').value='';
+    document.getElementById('sv-from-income').checked=false;
   }
   openModal('modal-savings');
 }
@@ -1560,12 +1572,13 @@ function saveSavingsEntry(){
   const amount=parseFloat(document.getElementById('sv-amount').value);
   const type=document.getElementById('sv-type').value;
   const note=document.getElementById('sv-note').value.trim();
+  const fromIncome=document.getElementById('sv-from-income').checked;
   if(!name||!amount){shake('modal-savings');return;}
   if(editingSvId){
     const sv=savings.find(x=>x.id===editingSvId);
-    Object.assign(sv,{name,emoji,amount,type,note});
+    Object.assign(sv,{name,emoji,amount,type,note,fromIncome});
   } else {
-    savings.push({id:uid(),name,emoji,amount,type,note});
+    savings.push({id:uid(),name,emoji,amount,type,note,fromIncome});
   }
   save(STORE_KEYS.savings,savings);
   closeModal('modal-savings');
