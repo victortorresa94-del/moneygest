@@ -133,6 +133,31 @@ input[type="date"]{cursor:pointer}
 .tx-cat{font-size:11px;color:var(--muted)}
 .tx-actions{display:flex;gap:2px;margin-left:8px}
 
+/* ── BOTTOM NAV ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--surface);border-top:1px solid var(--border);z-index:100;align-items:center;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom)}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;cursor:pointer;color:var(--muted);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;border-radius:10px;min-width:52px;transition:color .15s;position:relative}
+.bn-item.active{color:var(--text)}
+.bn-item svg{width:22px;height:22px;stroke-width:1.8}
+.bn-badge{position:absolute;top:4px;right:10px;background:var(--expense);color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 4px}
+
+/* ── MORE DRAWER ── */
+.more-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:16px 0 calc(16px + env(safe-area-inset-bottom));width:100%;max-width:600px;margin:0 auto}
+.more-handle{width:40px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 20px}
+.more-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:0 20px 10px}
+.more-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;font-size:15px;font-weight:500;transition:background .15s}
+.more-item:hover,.more-item:active{background:var(--bg)}
+.more-item svg{width:20px;height:20px;color:var(--muted);flex-shrink:0}
+
+/* ── BILL ROWS ── */
+.bill-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px}
+.bill-row:last-child{border-bottom:none}
+.bill-paid{opacity:.5}
+.bill-due-urgent{background:#FDF2F2;color:var(--expense);border:1px solid #F5C6CB}
+.bill-due-soon{background:#FFF3CD;color:#856404;border:1px solid #FFEAA7}
+.bill-due-ok{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.bill-due-paid{background:#D4EDDA;color:#155724;border:1px solid #C3E6CB}
+.bill-due{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+
 /* ── SUBSCRIPTIONS ── */
 .subs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .sub-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px}
@@ -196,14 +221,30 @@ input[type="date"]{cursor:pointer}
   .cats-grid{grid-template-columns:1fr}
 }
 @media(max-width:700px){
-  .sidebar{width:56px}
-  .nav-item span,.logo span,.nav-section,.sidebar-footer{display:none}
-  .logo{padding:0 0 32px;justify-content:center}
-  .logo-dot{width:10px;height:10px}
-  .nav-item{justify-content:center;padding:10px}
-  .main{margin-left:56px;padding:24px 20px;max-width:calc(100vw - 56px)}
-  .stats-grid{grid-template-columns:1fr 1fr}
+  .sidebar{display:none}
+  .bottom-nav{display:flex}
+  .main{margin-left:0;padding:20px 16px 80px;max-width:100vw}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-card{padding:14px 16px}
+  .stat-value{font-size:20px}
   .form-grid{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:1fr;gap:12px}
+  .subs-grid{grid-template-columns:1fr}
+  .cats-grid{grid-template-columns:1fr}
+  .page-header{flex-wrap:wrap;gap:10px;margin-bottom:20px}
+  .page-title{font-size:18px}
+  .table-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .search-wrap{max-width:100%;width:100%}
+  .filter-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;gap:6px}
+  .filter-bar::-webkit-scrollbar{display:none}
+  /* Modal como bottom sheet */
+  .overlay{align-items:flex-end}
+  .modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh}
+  .modal-header{margin-bottom:18px}
+  .modal-actions{margin-top:18px}
+  .card{padding:16px}
+  .card-title{margin-bottom:12px}
+  .sub-card{padding:14px 14px}
 }
 </style>
 </head>
@@ -235,8 +276,57 @@ input[type="date"]{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
     <span>Categorías</span>
   </div>
+  <div class="nav-item" onclick="goTo('data')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>Datos</span>
+  </div>
   <div class="sidebar-footer">v1.0</div>
 </nav>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="bn-item active" onclick="goTo('dashboard')" data-page="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Inicio</span>
+  </div>
+  <div class="bn-item" onclick="goTo('transactions')" data-page="transactions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+    <span>Movimientos</span>
+  </div>
+  <div class="bn-item" onclick="goTo('bills')" data-page="bills">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    <span id="bills-badge" class="bn-badge" style="display:none"></span>
+    <span>Pagos</span>
+  </div>
+  <div class="bn-item" onclick="goTo('subscriptions')" data-page="subscriptions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
+    <span>Suscripciones</span>
+  </div>
+  <div class="bn-item" onclick="openMore()" id="bn-more">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+    <span>Más</span>
+  </div>
+</nav>
+
+<!-- MORE DRAWER (mobile) -->
+<div class="overlay" id="more-overlay" onclick="if(event.target===this) closeMore()" style="align-items:flex-end">
+  <div class="more-sheet">
+    <div class="more-handle"></div>
+    <div class="more-title">Más secciones</div>
+    <div class="more-item" onclick="goTo('expected');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Ingresos Esperados
+    </div>
+    <div class="more-item" onclick="goTo('categories');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
+      Categorías
+    </div>
+    <div class="more-item" onclick="goTo('data');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Datos / Backup
+    </div>
+  </div>
+</div>
 
 <!-- MAIN -->
 <main class="main">
@@ -345,6 +435,50 @@ input[type="date"]{cursor:pointer}
     </div>
   </div>
 
+  <!-- ── PAGOS PENDIENTES ── -->
+  <div id="page-bills" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Pagos Pendientes</div><div class="page-sub" id="bills-summary-sub">Facturas, deudas y pagos puntuales</div></div>
+      <button class="btn btn-primary" onclick="openBillModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Añadir
+      </button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px" id="bills-filters">
+      <div class="chip active" data-filter="pending" onclick="setBillsFilter('pending',this)">Pendientes</div>
+      <div class="chip" data-filter="all" onclick="setBillsFilter('all',this)">Todos</div>
+      <div class="chip" data-filter="paid" onclick="setBillsFilter('paid',this)">Pagados</div>
+    </div>
+    <div class="card"><div id="bills-list"></div></div>
+  </div>
+
+  <!-- ── DATOS ── -->
+  <div id="page-data" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Datos</div><div class="page-sub">Exporta o importa tus datos para no perderlos nunca</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:760px">
+      <div class="card">
+        <div class="card-title">Exportar copia de seguridad</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Descarga todos tus datos (movimientos, ingresos esperados, suscripciones y categorías) en un archivo JSON. Guárdalo antes de hacer cambios en la app.</p>
+        <button class="btn btn-primary" onclick="exportData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar backup
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-title">Importar copia de seguridad</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Restaura tus datos desde un archivo JSON exportado anteriormente. <strong style="color:var(--expense)">Reemplazará todos los datos actuales.</strong></p>
+        <label class="btn btn-ghost" style="cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Cargar backup
+          <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+        </label>
+      </div>
+    </div>
+    <div id="data-msg" style="margin-top:20px;max-width:760px"></div>
+  </div>
+
 </main>
 
 <!-- ── MODAL: TRANSACTION ── -->
@@ -430,6 +564,33 @@ input[type="date"]{cursor:pointer}
   </div>
 </div>
 
+<!-- ── MODAL: BILL ── -->
+<div class="overlay" id="modal-bill">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="bill-modal-title">Nuevo Pago Pendiente</div>
+      <button class="close-btn" onclick="closeModal('modal-bill')">&times;</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Descripción</label><input type="text" id="bill-name" placeholder="Ej. Alquiler, Factura luz, Le debo a Juan..."></div>
+      <div class="form-group"><label>Importe (€)</label><input type="number" id="bill-amount" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="form-group"><label>Emoji / Icono</label><input type="text" id="bill-emoji" placeholder="🏠" maxlength="4"></div>
+      <div class="form-group"><label>Fecha límite</label><input type="date" id="bill-due"></div>
+      <div class="form-group"><label>Estado</label>
+        <select id="bill-status">
+          <option value="pending">Pendiente</option>
+          <option value="paid">Pagado</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Nota (opcional)</label><textarea id="bill-note" placeholder="Transferencia, efectivo, persona..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-bill')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveBill()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── MODAL: CATEGORY ── -->
 <div class="overlay" id="modal-cat">
   <div class="modal">
@@ -452,7 +613,7 @@ input[type="date"]{cursor:pointer}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const STORE_KEYS = {tx:'fnz_tx',exp:'fnz_exp',sub:'fnz_sub',cats:'fnz_cats'};
+const STORE_KEYS = {tx:'fnz_tx',exp:'fnz_exp',sub:'fnz_sub',cats:'fnz_cats',bills:'fnz_bills'};
 
 const DEFAULT_CATS = {
   income:[
@@ -481,6 +642,7 @@ let transactions = load(STORE_KEYS.tx,[]);
 let expectedIncome = load(STORE_KEYS.exp,[]);
 let subscriptions = load(STORE_KEYS.sub,[]);
 let categories = load(STORE_KEYS.cats, DEFAULT_CATS);
+let bills = load(STORE_KEYS.bills,[]);
 
 // Demo data if empty
 if(!transactions.length){
@@ -523,6 +685,18 @@ if(!subscriptions.length){
   save(STORE_KEYS.sub, subscriptions);
 }
 
+if(!bills.length){
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const fmt2 = (d)=>d.toISOString().slice(0,10);
+  bills = [
+    {id:uid(),name:'Alquiler',emoji:'🏠',amount:750,dueDate:fmt2(new Date(y,m,1)),note:'Transferencia al propietario',status:'pending'},
+    {id:uid(),name:'Factura luz',emoji:'💡',amount:87.50,dueDate:fmt2(new Date(y,m,10)),note:'',status:'pending'},
+    {id:uid(),name:'Le debo a Carlos',emoji:'👤',amount:40,dueDate:fmt2(new Date(y,m,20)),note:'Cena del viernes',status:'pending'},
+  ];
+  save(STORE_KEYS.bills, bills);
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  HELPERS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -549,6 +723,7 @@ function monthLabel(y,m){
 //  NAVIGATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let currentPage = 'dashboard';
+const MORE_PAGES = ['expected','categories','data'];
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -556,15 +731,24 @@ function goTo(page){
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')===`goTo('${page}')`) n.classList.add('active');
   });
+  // Bottom nav active state
+  document.querySelectorAll('.bn-item').forEach(n=>n.classList.remove('active'));
+  const bnMatch = document.querySelector(`.bn-item[data-page="${page}"]`);
+  if(bnMatch) bnMatch.classList.add('active');
+  else if(MORE_PAGES.includes(page)) document.getElementById('bn-more').classList.add('active');
   currentPage = page;
   renderPage(page);
 }
+function openMore(){document.getElementById('more-overlay').classList.add('open')}
+function closeMore(){document.getElementById('more-overlay').classList.remove('open')}
 function renderPage(p){
   if(p==='dashboard') renderDashboard();
   else if(p==='transactions') renderTransactions();
   else if(p==='expected') renderExpected();
   else if(p==='subscriptions') renderSubscriptions();
   else if(p==='categories') renderCategories();
+  else if(p==='bills') renderBills();
+  // 'data' page is static, nothing to render
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1030,6 +1214,129 @@ function deleteSub(id){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PAGOS PENDIENTES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let billsFilter = 'pending';
+let editingBillId = null;
+
+function setBillsFilter(f,el){
+  billsFilter=f;
+  document.querySelectorAll('#bills-filters .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderBills();
+}
+
+function billDueInfo(dueDate, status){
+  if(status==='paid') return {cls:'bill-due-paid',label:'Pagado'};
+  if(!dueDate) return {cls:'bill-due-ok',label:'Sin fecha'};
+  const diff = Math.ceil((new Date(dueDate+'T12:00:00') - new Date()) / (1000*60*60*24));
+  if(diff < 0) return {cls:'bill-due-urgent',label:`Vencido hace ${Math.abs(diff)}d`};
+  if(diff === 0) return {cls:'bill-due-urgent',label:'Vence hoy'};
+  if(diff <= 3) return {cls:'bill-due-urgent',label:`${diff}d`};
+  if(diff <= 7) return {cls:'bill-due-soon',label:`${diff}d`};
+  return {cls:'bill-due-ok',label:fmtDate(dueDate)};
+}
+
+function renderBills(){
+  let list = [...bills].sort((a,b)=>{
+    if(a.status==='paid' && b.status!=='paid') return 1;
+    if(a.status!=='paid' && b.status==='paid') return -1;
+    return new Date(a.dueDate||'9999') - new Date(b.dueDate||'9999');
+  });
+  if(billsFilter==='pending') list=list.filter(b=>b.status==='pending');
+  else if(billsFilter==='paid') list=list.filter(b=>b.status==='paid');
+
+  const pending = bills.filter(b=>b.status==='pending');
+  const total = pending.reduce((s,b)=>s+b.amount,0);
+  document.getElementById('bills-summary-sub').textContent =
+    pending.length ? `${pending.length} pendiente${pending.length!==1?'s':''} · ${fmt(total)}` : 'Sin pagos pendientes';
+
+  // Badge en bottom nav
+  updateBillsBadge();
+
+  document.getElementById('bills-list').innerHTML = list.length ? list.map(b=>{
+    const due = billDueInfo(b.dueDate, b.status);
+    return `<div class="bill-row ${b.status==='paid'?'bill-paid':''}">
+      <div class="tx-icon" style="font-size:16px">${b.emoji||'💳'}</div>
+      <div class="tx-info">
+        <div class="tx-name">${b.name}</div>
+        <div class="tx-meta">${b.note||'&nbsp;'}</div>
+      </div>
+      <div class="tx-right" style="min-width:80px">
+        <div class="tx-amount c-expense">${fmt(b.amount)}</div>
+        <div style="margin-top:3px"><span class="bill-due ${due.cls}">${due.label}</span></div>
+      </div>
+      <div class="tx-actions">
+        ${b.status==='pending'?`<button class="btn-icon" onclick="markBillPaid('${b.id}')" title="Marcar como pagado" style="color:var(--income)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>`:''}
+        <button class="btn-icon" onclick="openBillModal('${b.id}')" title="Editar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-danger-icon" onclick="deleteBill('${b.id}')" title="Eliminar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="empty-state"><div class="e-icon">✅</div><p>Sin pagos en esta vista</p></div>';
+}
+
+function openBillModal(id){
+  editingBillId=id||null;
+  const b=id?bills.find(x=>x.id===id):null;
+  document.getElementById('bill-modal-title').textContent=id?'Editar Pago':'Nuevo Pago Pendiente';
+  if(b){
+    document.getElementById('bill-name').value=b.name;
+    document.getElementById('bill-emoji').value=b.emoji||'';
+    document.getElementById('bill-amount').value=b.amount;
+    document.getElementById('bill-due').value=b.dueDate||'';
+    document.getElementById('bill-status').value=b.status;
+    document.getElementById('bill-note').value=b.note||'';
+  } else {
+    document.getElementById('bill-name').value='';
+    document.getElementById('bill-emoji').value='';
+    document.getElementById('bill-amount').value='';
+    document.getElementById('bill-due').value='';
+    document.getElementById('bill-status').value='pending';
+    document.getElementById('bill-note').value='';
+  }
+  openModal('modal-bill');
+}
+
+function saveBill(){
+  const name=document.getElementById('bill-name').value.trim();
+  const emoji=document.getElementById('bill-emoji').value.trim();
+  const amount=parseFloat(document.getElementById('bill-amount').value);
+  const dueDate=document.getElementById('bill-due').value;
+  const status=document.getElementById('bill-status').value;
+  const note=document.getElementById('bill-note').value.trim();
+  if(!name||!amount){shake('modal-bill');return;}
+  if(editingBillId){
+    const b=bills.find(x=>x.id===editingBillId);
+    Object.assign(b,{name,emoji,amount,dueDate,status,note});
+  } else {
+    bills.push({id:uid(),name,emoji,amount,dueDate,status,note});
+  }
+  save(STORE_KEYS.bills,bills);
+  closeModal('modal-bill');
+  renderBills();
+}
+
+function markBillPaid(id){
+  const b=bills.find(x=>x.id===id);
+  b.status='paid';
+  save(STORE_KEYS.bills,bills);
+  renderBills();
+}
+
+function deleteBill(id){
+  if(!confirm('¿Eliminar este pago?')) return;
+  bills=bills.filter(b=>b.id!==id);
+  save(STORE_KEYS.bills,bills);
+  renderBills();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  CATEGORIES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let catModalType = 'income';
@@ -1113,9 +1420,70 @@ style.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{tran
 document.head.appendChild(style);
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  BACKUP / RESTORE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function exportData(){
+  const backup = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: {
+      [STORE_KEYS.tx]: transactions,
+      [STORE_KEYS.exp]: expectedIncome,
+      [STORE_KEYS.sub]: subscriptions,
+      [STORE_KEYS.cats]: categories,
+      [STORE_KEYS.bills]: bills
+    }
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `moneygest-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showDataMsg('Backup descargado correctamente.', 'income');
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const backup = JSON.parse(ev.target.result);
+      if(!backup.data) throw new Error('Formato inválido');
+      const d = backup.data;
+      if(d[STORE_KEYS.tx]) { transactions = d[STORE_KEYS.tx]; save(STORE_KEYS.tx, transactions); }
+      if(d[STORE_KEYS.exp]) { expectedIncome = d[STORE_KEYS.exp]; save(STORE_KEYS.exp, expectedIncome); }
+      if(d[STORE_KEYS.sub]) { subscriptions = d[STORE_KEYS.sub]; save(STORE_KEYS.sub, subscriptions); }
+      if(d[STORE_KEYS.cats]) { categories = d[STORE_KEYS.cats]; save(STORE_KEYS.cats, categories); }
+      if(d[STORE_KEYS.bills]) { bills = d[STORE_KEYS.bills]; save(STORE_KEYS.bills, bills); }
+      showDataMsg('Datos importados correctamente. Puedes navegar a cualquier sección.', 'income');
+    } catch(err) {
+      showDataMsg('Error al importar: archivo no válido.', 'expense');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function showDataMsg(text, type){
+  const el = document.getElementById('data-msg');
+  el.innerHTML = `<div style="padding:12px 16px;border-radius:var(--radius-sm);background:var(--${type}-bg);color:var(--${type});font-size:13px;font-weight:500">${text}</div>`;
+  setTimeout(()=>{ el.innerHTML=''; }, 5000);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function updateBillsBadge(){
+  const n = bills.filter(b=>b.status==='pending').length;
+  const badge = document.getElementById('bills-badge');
+  if(badge){ badge.textContent = n||''; badge.style.display = n?'block':'none'; }
+}
 renderDashboard();
+updateBillsBadge();
 </script>
 </body>
 </html>

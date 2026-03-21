@@ -44,6 +44,15 @@ La función `renderSubscriptions` empieza alrededor de la línea 930 en `finanza
 
 **Efecto del bug:** el dashboard carga la estructura HTML estática pero el JS no se ejecuta, por lo que las tarjetas de stats y todos los listados aparecen vacíos.
 
+## Flujo de backup recomendado
+Antes de hacer cambios en la app:
+1. Ve a **Datos** en el sidebar → "Descargar backup" → guarda el `.json`
+2. Haz tus cambios y despliega
+3. Si pierdes datos: ve a **Datos** → "Cargar backup" → selecciona el `.json`
+
+Los datos están en `localStorage` bajo las claves `fnz_tx`, `fnz_exp`, `fnz_sub`, `fnz_cats`.
+El `localStorage` persiste entre deploys en la misma URL, pero se pierde si limpias el navegador o cambias de dispositivo. El backup JSON es la solución.
+
 ## Funcionalidades implementadas
 - Dashboard con stats mensuales (ingresos, gastos, balance, esperado pendiente)
 - Navegación por mes (anterior / siguiente)
@@ -55,6 +64,7 @@ La función `renderSubscriptions` empieza alrededor de la línea 930 en `finanza
 - Página Ingresos Esperados: añadir/editar/eliminar, marcar cobrado
 - Página Suscripciones: gestión completa, activar/pausar, badge días restantes
 - Página Categorías: crear/editar/eliminar categorías de ingreso y gasto
+- Página Datos: exportar backup JSON / importar backup JSON (para no perder datos entre cambios)
 
 ## Stack
 - Vanilla HTML/CSS/JS — sin frameworks, sin dependencias
