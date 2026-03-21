@@ -925,14 +925,29 @@ function getDashBlock(id){
   const monthTx = transactions.filter(txInMonth);
   const totalIncome = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const totalExpense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  // Patrimonio real-time (ahorros + todos los ingresos - todos los gastos - pagos vencidos + cobros vencidos)
+  const savingsTotal = savings.reduce((s,sv)=>s+sv.amount,0);
+  const allTxIncome = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const allTxExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const todayD = new Date(); todayD.setHours(12,0,0,0);
+  const dueBills = bills.filter(b=>b.status==='pending'&&b.dueDate&&new Date(b.dueDate+'T12:00:00')<=todayD).reduce((s,b)=>s+b.amount,0);
+  const dueExpected = expectedIncome.filter(e=>(e.status==='pending'||e.status==='overdue')&&e.expectedDate&&new Date(e.expectedDate+'T12:00:00')<=todayD).reduce((s,e)=>s+e.amount,0);
+  const patrimonioTotal = savingsTotal + allTxIncome - allTxExpense - dueBills + dueExpected;
   switch(id){
     case 'patrimonio': {
-      const total = savings.reduce((s,sv)=>s+sv.amount,0);
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0');
       return `<div class="patrimonio-card" onclick="goTo('savings')" style="cursor:pointer">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.55;margin-bottom:6px">Patrimonio total</div>
-        <div style="font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1">${fmt(total)}</div>
-        <div style="font-size:12px;opacity:.45;margin-top:4px">${savings.length} cuenta${savings.length!==1?'s':''} · toca para gestionar</div>
-        ${savings.length ? `<div class="patrimonio-accounts">${savings.slice(0,4).map(sv=>`
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.55;margin-bottom:6px">Patrimonio total · ${dd}</div>
+        <div style="font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1">${fmt(patrimonioTotal)}</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;opacity:.6">
+          <span>💰 Ahorros ${fmt(savingsTotal)}</span>
+          <span>📈 Ingresos ${fmt(allTxIncome)}</span>
+          <span>📉 Gastos −${fmt(allTxExpense)}</span>
+          ${dueBills>0?`<span>💳 Vencidos −${fmt(dueBills)}</span>`:''}
+          ${dueExpected>0?`<span>🔔 Cobrados +${fmt(dueExpected)}</span>`:''}
+        </div>
+        ${savings.length ? `<div class="patrimonio-accounts" style="margin-top:12px">${savings.slice(0,4).map(sv=>`
           <div><div style="font-size:10px;opacity:.5;font-weight:600;margin-bottom:2px">${sv.emoji||'💰'} ${sv.name}</div>
           <div style="font-size:15px;font-weight:700">${fmt(sv.amount)}</div></div>`).join('')}
           ${savings.length>4?`<div style="opacity:.35;align-self:flex-end;font-size:12px">+${savings.length-4} más</div>`:''}
@@ -941,12 +956,18 @@ function getDashBlock(id){
     }
     case 'stats': {
       const balance=totalIncome-totalExpense;
-      const totalExp=expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').reduce((s,e)=>s+e.amount,0);
+      const monthPendExp = expectedIncome.filter(e=>{
+        if(e.status!=='pending'&&e.status!=='overdue') return false;
+        if(!e.expectedDate) return true;
+        const d=new Date(e.expectedDate+'T12:00:00');
+        return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;
+      }).reduce((s,e)=>s+e.amount,0);
+      const totalPendiente = patrimonioTotal + monthPendExp;
       return `<div class="stats-grid" style="margin-bottom:0">
         <div class="stat-card"><div class="stat-label">Ingresos</div><div class="stat-value c-income">${fmt(totalIncome)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='income').length} mov.</div></div>
         <div class="stat-card"><div class="stat-label">Gastos</div><div class="stat-value c-expense">${fmt(totalExpense)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='expense').length} mov.</div></div>
         <div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value ${balance>=0?'c-income':'c-expense'}">${fmt(balance)}</div><div class="stat-sub">${balance>=0?'Superávit':'Déficit'}</div></div>
-        <div class="stat-card"><div class="stat-label">Pend. cobrar</div><div class="stat-value">${fmt(totalExp)}</div><div class="stat-sub">${expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').length} entradas</div></div>
+        <div class="stat-card"><div class="stat-label">Total pendiente</div><div class="stat-value">${fmt(totalPendiente)}</div><div class="stat-sub">patrimonio + pend. mes</div></div>
       </div>`;
     }
     case 'pending-bills': {
