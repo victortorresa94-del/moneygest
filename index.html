@@ -141,11 +141,24 @@ input[type="date"]{cursor:pointer}
 .tx-actions{display:flex;gap:2px;margin-left:8px}
 
 /* ── BOTTOM NAV ── */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:62px;background:var(--surface);border-top:1px solid var(--border);z-index:100;align-items:center;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom)}
-.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;cursor:pointer;color:var(--muted);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;border-radius:10px;min-width:52px;transition:color .15s;position:relative}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;align-items:center;justify-content:space-around;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.bn-item{display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);border-radius:12px;padding:8px 18px;min-width:44px;min-height:44px;transition:color .15s;position:relative}
 .bn-item.active{color:var(--text)}
-.bn-item svg{width:22px;height:22px;stroke-width:1.8}
-.bn-badge{position:absolute;top:4px;right:10px;background:var(--expense);color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 4px}
+.bn-item.active svg{stroke-width:2.5}
+.bn-item svg{width:24px;height:24px;stroke-width:1.8}
+.bn-badge{position:absolute;top:2px;right:8px;background:var(--expense);color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 4px}
+
+/* ── SAVINGS ── */
+.savings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.savings-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:6px}
+.savings-total-bar{background:var(--text);color:#fff;border-radius:var(--radius);padding:20px 24px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+
+/* ── DASHBOARD BLOCKS ── */
+.dash-block{margin-bottom:16px;position:relative}
+.dash-block-controls{display:flex;gap:4px;justify-content:flex-end;margin-bottom:6px}
+.dash-editing-banner{background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--radius);padding:12px 16px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.patrimonio-card{background:var(--text);border-radius:var(--radius);padding:22px 24px;color:#fff;cursor:default}
+.patrimonio-accounts{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.15)}
 
 /* ── MORE DRAWER ── */
 .more-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:16px 0 calc(16px + env(safe-area-inset-bottom));width:100%;max-width:600px;margin:0 auto}
@@ -236,6 +249,7 @@ input[type="date"]{cursor:pointer}
   .stat-value{font-size:20px}
   .form-grid{grid-template-columns:1fr}
   .dashboard-grid{grid-template-columns:1fr;gap:12px}
+  .savings-grid{grid-template-columns:1fr 1fr}
   .subs-grid{grid-template-columns:1fr}
   .cats-grid{grid-template-columns:1fr}
   .page-header{flex-wrap:wrap;gap:10px;margin-bottom:20px}
@@ -278,6 +292,10 @@ input[type="date"]{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
     <span>Suscripciones</span>
   </div>
+  <div class="nav-item" onclick="goTo('savings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
+    <span>Ahorro</span>
+  </div>
   <div class="nav-section">Config</div>
   <div class="nav-item" onclick="goTo('categories')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
@@ -294,24 +312,19 @@ input[type="date"]{cursor:pointer}
 <nav class="bottom-nav" id="bottom-nav">
   <div class="bn-item active" onclick="goTo('dashboard')" data-page="dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Inicio</span>
   </div>
   <div class="bn-item" onclick="goTo('transactions')" data-page="transactions">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
-    <span>Movimientos</span>
   </div>
   <div class="bn-item" onclick="goTo('bills')" data-page="bills">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
     <span id="bills-badge" class="bn-badge" style="display:none"></span>
-    <span>Pagos</span>
   </div>
   <div class="bn-item" onclick="goTo('subscriptions')" data-page="subscriptions">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
-    <span>Suscripciones</span>
   </div>
   <div class="bn-item" onclick="openMore()" id="bn-more">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
-    <span>Más</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
   </div>
 </nav>
 
@@ -320,6 +333,10 @@ input[type="date"]{cursor:pointer}
   <div class="more-sheet">
     <div class="more-handle"></div>
     <div class="more-title">Más secciones</div>
+    <div class="more-item" onclick="goTo('savings');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
+      Ahorro e Inversiones
+    </div>
     <div class="more-item" onclick="goTo('expected');closeMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       Ingresos Esperados
@@ -340,22 +357,22 @@ input[type="date"]{cursor:pointer}
 
   <!-- ── DASHBOARD ── -->
   <div id="page-dashboard" class="page active">
-    <div class="page-header">
-      <div><div class="page-title">Dashboard</div><div class="page-sub" id="dash-period"></div></div>
-      <div class="month-nav">
-        <button class="month-btn" onclick="changeMonth(-1)">&#8249;</button>
-        <span id="month-label"></span>
-        <button class="month-btn" onclick="changeMonth(1)">&#8250;</button>
+    <div class="page-header" style="margin-bottom:16px">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub" id="dash-period"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="month-nav">
+          <button class="month-btn" onclick="changeMonth(-1)">&#8249;</button>
+          <span id="month-label"></span>
+          <button class="month-btn" onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <button class="btn btn-ghost" id="dash-edit-btn" onclick="toggleDashEdit()" style="padding:7px 12px;font-size:12px">Editar</button>
       </div>
     </div>
-    <div class="stats-grid" id="stats-grid"></div>
-    <div class="dashboard-grid">
-      <div class="card"><div class="card-title">Top Ingresos por Categoría</div><div id="top-income"></div></div>
-      <div class="card"><div class="card-title">Top Gastos por Categoría</div><div id="top-expense"></div></div>
-      <div class="card"><div class="card-title">Próximas Suscripciones</div><div id="upcoming-subs"></div></div>
-      <div class="card"><div class="card-title">Ingresos Esperados Pendientes</div><div id="pending-expected"></div></div>
-    </div>
-    <div class="card" style="margin-bottom:18px"><div class="card-title">Últimos Movimientos</div><div id="recent-tx"></div></div>
+    <div id="dash-editing-bar"></div>
+    <div id="dash-blocks"></div>
   </div>
 
   <!-- ── TRANSACTIONS ── -->
@@ -440,6 +457,19 @@ input[type="date"]{cursor:pointer}
         <div id="cat-expense-list"></div>
       </div>
     </div>
+  </div>
+
+  <!-- ── AHORRO E INVERSIONES ── -->
+  <div id="page-savings" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Ahorro e Inversiones</div><div class="page-sub" id="savings-total-sub">Tu patrimonio</div></div>
+      <button class="btn btn-primary" onclick="openSavingsModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Añadir
+      </button>
+    </div>
+    <div id="savings-total-card"></div>
+    <div class="savings-grid" id="savings-grid"></div>
   </div>
 
   <!-- ── PAGOS PENDIENTES ── -->
@@ -571,6 +601,35 @@ input[type="date"]{cursor:pointer}
   </div>
 </div>
 
+<!-- ── MODAL: SAVINGS ── -->
+<div class="overlay" id="modal-savings">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="savings-modal-title">Nueva cuenta</div>
+      <button class="close-btn" onclick="closeModal('modal-savings')">&times;</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Nombre</label><input type="text" id="sv-name" placeholder="Ej. Bitcoin, Fondo S&P 500, ING..."></div>
+      <div class="form-group"><label>Valor actual (€)</label><input type="number" id="sv-amount" placeholder="0.00" step="0.01" min="0"></div>
+      <div class="form-group"><label>Emoji</label><input type="text" id="sv-emoji" placeholder="₿" maxlength="4"></div>
+      <div class="form-group"><label>Tipo</label>
+        <select id="sv-type">
+          <option value="cuenta">Cuenta de ahorros</option>
+          <option value="crypto">Criptomonedas</option>
+          <option value="fondo">Fondo de inversión</option>
+          <option value="etf">ETF / Acciones</option>
+          <option value="otros">Otros</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Nota (opcional)</label><textarea id="sv-note" placeholder="Broker, wallet, plataforma..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-savings')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSavingsEntry()">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── MODAL: BILL ── -->
 <div class="overlay" id="modal-bill">
   <div class="modal">
@@ -620,7 +679,7 @@ input[type="date"]{cursor:pointer}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const STORE_KEYS = {tx:'fnz_tx',exp:'fnz_exp',sub:'fnz_sub',cats:'fnz_cats',bills:'fnz_bills'};
+const STORE_KEYS = {tx:'fnz_tx',exp:'fnz_exp',sub:'fnz_sub',cats:'fnz_cats',bills:'fnz_bills',savings:'fnz_savings',dash:'fnz_dash'};
 
 const DEFAULT_CATS = {
   income:[
@@ -650,6 +709,11 @@ let expectedIncome = load(STORE_KEYS.exp,[]);
 let subscriptions = load(STORE_KEYS.sub,[]);
 let categories = load(STORE_KEYS.cats, DEFAULT_CATS);
 let bills = load(STORE_KEYS.bills,[]);
+let savings = load(STORE_KEYS.savings,[]);
+const DEFAULT_DASH = {order:['patrimonio','stats','pending-bills','top-cats','upcoming','recent'],hidden:[]};
+let dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
+// Ensure all default blocks exist (migration safety)
+DEFAULT_DASH.order.forEach(b=>{ if(!dashConfig.order.includes(b)&&!dashConfig.hidden.includes(b)) dashConfig.order.push(b); });
 
 // Demo data if empty
 if(!transactions.length){
@@ -704,6 +768,15 @@ if(!bills.length){
   save(STORE_KEYS.bills, bills);
 }
 
+if(!savings.length){
+  savings = [
+    {id:uid(),name:'Bitcoin',emoji:'₿',amount:1250,type:'crypto',note:'Binance'},
+    {id:uid(),name:'Fondo S&P 500',emoji:'📈',amount:3400,type:'fondo',note:'Myinvestor'},
+    {id:uid(),name:'Cuenta Ahorro',emoji:'🏦',amount:5000,type:'cuenta',note:'ING'},
+  ];
+  save(STORE_KEYS.savings, savings);
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  HELPERS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -730,7 +803,7 @@ function monthLabel(y,m){
 //  NAVIGATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let currentPage = 'dashboard';
-const MORE_PAGES = ['expected','categories','data'];
+const MORE_PAGES = ['expected','categories','data','savings'];
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -755,6 +828,7 @@ function renderPage(p){
   else if(p==='subscriptions') renderSubscriptions();
   else if(p==='categories') renderCategories();
   else if(p==='bills') renderBills();
+  else if(p==='savings') renderSavings();
   // 'data' page is static, nothing to render
 }
 
@@ -777,114 +851,149 @@ function txInMonth(tx){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DASHBOARD
+//  DASHBOARD — bloque editable
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DASH_BLOCK_DEFS = [
+  {id:'patrimonio',  label:'Patrimonio'},
+  {id:'stats',       label:'Resumen mensual'},
+  {id:'pending-bills',label:'Pagos pendientes del mes'},
+  {id:'top-cats',    label:'Top categorías'},
+  {id:'upcoming',    label:'Próximas suscripciones'},
+  {id:'recent',      label:'Últimos movimientos'},
+];
+let dashEditing = false;
+
+function toggleDashEdit(){
+  dashEditing = !dashEditing;
+  document.getElementById('dash-edit-btn').textContent = dashEditing ? 'Listo ✓' : 'Editar';
+  renderDashboard();
+}
+function moveDashBlock(idx, dir){
+  const o=dashConfig.order; [o[idx],o[idx+dir]]=[o[idx+dir],o[idx]];
+  save(STORE_KEYS.dash, dashConfig); renderDashboard();
+}
+function hideDashBlock(id){
+  dashConfig.order=dashConfig.order.filter(b=>b!==id);
+  if(!dashConfig.hidden.includes(id)) dashConfig.hidden.push(id);
+  save(STORE_KEYS.dash, dashConfig); renderDashboard();
+}
+function showDashBlock(id){
+  dashConfig.hidden=dashConfig.hidden.filter(b=>b!==id);
+  dashConfig.order.push(id);
+  save(STORE_KEYS.dash, dashConfig); renderDashboard();
+}
+
 function renderDashboard(){
   document.getElementById('month-label').textContent = monthLabel(viewYear,viewMonth);
   document.getElementById('dash-period').textContent = monthLabel(viewYear,viewMonth);
 
+  // Edit bar
+  const editBar = document.getElementById('dash-editing-bar');
+  if(dashEditing){
+    const hid = dashConfig.hidden;
+    editBar.innerHTML = `<div class="dash-editing-banner">
+      <span>Modo edición — reordena y oculta bloques</span>
+      ${hid.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${hid.map(id=>{
+        const def=DASH_BLOCK_DEFS.find(d=>d.id===id);
+        return `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="showDashBlock('${id}')">+ ${def?.label||id}</button>`;
+      }).join('')}</div>` : '<span style="font-size:12px;color:var(--income)">Todos los bloques visibles</span>'}
+    </div>`;
+  } else { editBar.innerHTML=''; }
+
+  // Render ordered blocks
+  document.getElementById('dash-blocks').innerHTML = dashConfig.order.map((blockId,idx)=>{
+    const ctrl = dashEditing ? `<div class="dash-block-controls">
+      ${idx>0?`<button class="btn-icon" onclick="moveDashBlock(${idx},-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg></button>`:''}
+      ${idx<dashConfig.order.length-1?`<button class="btn-icon" onclick="moveDashBlock(${idx},1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>`:''}
+      <button class="btn-danger-icon" onclick="hideDashBlock('${blockId}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>` : '';
+    return `<div class="dash-block" data-block="${blockId}">${ctrl}${getDashBlock(blockId)}</div>`;
+  }).join('');
+}
+
+function getDashBlock(id){
   const monthTx = transactions.filter(txInMonth);
   const totalIncome = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const totalExpense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const balance = totalIncome - totalExpense;
-  const totalExpected = expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').reduce((s,e)=>s+e.amount,0);
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Ingresos</div>
-      <div class="stat-value c-income">${fmt(totalIncome)}</div>
-      <div class="stat-sub">${monthTx.filter(t=>t.type==='income').length} movimientos</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Gastos</div>
-      <div class="stat-value c-expense">${fmt(totalExpense)}</div>
-      <div class="stat-sub">${monthTx.filter(t=>t.type==='expense').length} movimientos</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Balance</div>
-      <div class="stat-value ${balance>=0?'c-income':'c-expense'}">${fmt(balance)}</div>
-      <div class="stat-sub">${balance>=0?'Superávit':'Déficit'}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Esperado Pendiente</div>
-      <div class="stat-value">${fmt(totalExpected)}</div>
-      <div class="stat-sub">${expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').length} entradas</div>
-    </div>
-  `;
-
-  // Top income categories
-  const incomeBycat={};
-  monthTx.filter(t=>t.type==='income').forEach(t=>{
-    incomeBycat[t.category]=(incomeBycat[t.category]||0)+t.amount;
-  });
-  const sortedIncome=Object.entries(incomeBycat).sort((a,b)=>b[1]-a[1]);
-  const maxI=sortedIncome[0]?.[1]||1;
-  document.getElementById('top-income').innerHTML = sortedIncome.length ? sortedIncome.slice(0,5).map(([id,amt])=>{
-    const c=getCat('income',id);
-    return `<div class="list-row">
-      <div class="row-left"><div class="row-icon">${c.emoji}</div>
-        <div><div class="row-name">${c.name}</div><div class="progress-bar" style="width:120px"><div class="progress-fill c-income" style="width:${Math.round(amt/maxI*100)}%"></div></div></div>
-      </div>
-      <div class="row-right"><div class="row-amount c-income">${fmt(amt)}</div><div class="row-pct">${Math.round(amt/totalIncome*100)}%</div></div>
-    </div>`;
-  }).join('') : '<div class="empty-state"><p>Sin ingresos este mes</p></div>';
-
-  // Top expense categories
-  const expenseBycat={};
-  monthTx.filter(t=>t.type==='expense').forEach(t=>{
-    expenseBycat[t.category]=(expenseBycat[t.category]||0)+t.amount;
-  });
-  const sortedExpense=Object.entries(expenseBycat).sort((a,b)=>b[1]-a[1]);
-  const maxE=sortedExpense[0]?.[1]||1;
-  document.getElementById('top-expense').innerHTML = sortedExpense.length ? sortedExpense.slice(0,5).map(([id,amt])=>{
-    const c=getCat('expense',id);
-    return `<div class="list-row">
-      <div class="row-left"><div class="row-icon">${c.emoji}</div>
-        <div><div class="row-name">${c.name}</div><div class="progress-bar" style="width:120px"><div class="progress-fill c-expense" style="width:${Math.round(amt/maxE*100)}%"></div></div></div>
-      </div>
-      <div class="row-right"><div class="row-amount c-expense">${fmt(amt)}</div><div class="row-pct">${Math.round(amt/totalExpense*100)}%</div></div>
-    </div>`;
-  }).join('') : '<div class="empty-state"><p>Sin gastos este mes</p></div>';
-
-  // Upcoming subscriptions
-  const activeSubs = subscriptions.filter(s=>s.active).sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
-  document.getElementById('upcoming-subs').innerHTML = activeSubs.length ? activeSubs.slice(0,5).map(s=>{
-    const d=daysUntil(s.day);
-    const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';
-    const label=d===0?'Hoy':d===1?'Mañana':`${d}d`;
-    return `<div class="upcoming-item">
-      <div class="row-left"><div class="row-icon">${s.emoji||'📦'}</div>
-        <div><div class="row-name">${s.name}</div><div class="row-meta">Día ${s.day} del mes</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="row-amount c-expense">${fmt(s.amount)}</span>
-        <span class="days-badge ${cls}">${label}</span>
-      </div>
-    </div>`;
-  }).join('') : '<div class="empty-state"><p>No hay suscripciones activas</p></div>';
-
-  // Pending expected income
-  const pending = expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue')
-    .sort((a,b)=>new Date(a.expectedDate)-new Date(b.expectedDate));
-  document.getElementById('pending-expected').innerHTML = pending.length ? pending.slice(0,5).map(e=>{
-    const sc = e.status==='overdue'?'badge-overdue':'badge-pending';
-    const sl = e.status==='overdue'?'Vencido':'Pendiente';
-    return `<div class="list-row">
-      <div class="row-left">
-        <div class="row-icon">${getCat('income',e.category).emoji}</div>
-        <div><div class="row-name">${e.source}</div><div class="row-meta">${fmtDate(e.expectedDate)}</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="row-amount c-income">${fmt(e.amount)}</span>
-        <span class="status-badge ${sc}">${sl}</span>
-      </div>
-    </div>`;
-  }).join('') : '<div class="empty-state"><p>No hay ingresos pendientes</p></div>';
-
-  // Recent transactions
-  const recent = [...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
-  document.getElementById('recent-tx').innerHTML = recent.length ? recent.map(t=>txRow(t,false)).join('') :
-    '<div class="empty-state"><p>Sin movimientos todavía</p></div>';
+  switch(id){
+    case 'patrimonio': {
+      const total = savings.reduce((s,sv)=>s+sv.amount,0);
+      return `<div class="patrimonio-card" onclick="goTo('savings')" style="cursor:pointer">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.55;margin-bottom:6px">Patrimonio total</div>
+        <div style="font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1">${fmt(total)}</div>
+        <div style="font-size:12px;opacity:.45;margin-top:4px">${savings.length} cuenta${savings.length!==1?'s':''} · toca para gestionar</div>
+        ${savings.length ? `<div class="patrimonio-accounts">${savings.slice(0,4).map(sv=>`
+          <div><div style="font-size:10px;opacity:.5;font-weight:600;margin-bottom:2px">${sv.emoji||'💰'} ${sv.name}</div>
+          <div style="font-size:15px;font-weight:700">${fmt(sv.amount)}</div></div>`).join('')}
+          ${savings.length>4?`<div style="opacity:.35;align-self:flex-end;font-size:12px">+${savings.length-4} más</div>`:''}
+        </div>` : `<div style="opacity:.4;font-size:13px;margin-top:14px">Sin cuentas — toca para añadir →</div>`}
+      </div>`;
+    }
+    case 'stats': {
+      const balance=totalIncome-totalExpense;
+      const totalExp=expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').reduce((s,e)=>s+e.amount,0);
+      return `<div class="stats-grid" style="margin-bottom:0">
+        <div class="stat-card"><div class="stat-label">Ingresos</div><div class="stat-value c-income">${fmt(totalIncome)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='income').length} mov.</div></div>
+        <div class="stat-card"><div class="stat-label">Gastos</div><div class="stat-value c-expense">${fmt(totalExpense)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='expense').length} mov.</div></div>
+        <div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value ${balance>=0?'c-income':'c-expense'}">${fmt(balance)}</div><div class="stat-sub">${balance>=0?'Superávit':'Déficit'}</div></div>
+        <div class="stat-card"><div class="stat-label">Pend. cobrar</div><div class="stat-value">${fmt(totalExp)}</div><div class="stat-sub">${expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').length} entradas</div></div>
+      </div>`;
+    }
+    case 'pending-bills': {
+      const mb=bills.filter(b=>{if(b.status!=='pending')return false;if(!b.dueDate)return true;const d=new Date(b.dueDate+'T12:00:00');return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;});
+      const totalB=mb.reduce((s,b)=>s+b.amount,0);
+      return `<div class="card"><div class="card-title">Pagos pendientes del mes</div>
+        ${mb.length?`<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
+          <span style="font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--expense)">${fmt(totalB)}</span>
+          <span style="font-size:12px;color:var(--muted)">${mb.length} pago${mb.length!==1?'s':''}</span></div>
+          ${mb.slice(0,4).map(b=>{const due=billDueInfo(b.dueDate,b.status);return `<div class="list-row">
+            <div class="row-left"><div class="row-icon">${b.emoji||'💳'}</div><div><div class="row-name">${b.name}</div><div class="row-meta">${b.note||''}</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-expense">${fmt(b.amount)}</span><span class="bill-due ${due.cls}">${due.label}</span></div>
+          </div>`;}).join('')}`
+        :'<div class="empty-state" style="padding:16px 0"><p>Sin pagos pendientes este mes ✓</p></div>'}
+      </div>`;
+    }
+    case 'top-cats': {
+      const ibc={},ebc={};
+      monthTx.filter(t=>t.type==='income').forEach(t=>{ibc[t.category]=(ibc[t.category]||0)+t.amount;});
+      monthTx.filter(t=>t.type==='expense').forEach(t=>{ebc[t.category]=(ebc[t.category]||0)+t.amount;});
+      const si=Object.entries(ibc).sort((a,b)=>b[1]-a[1]),maxI=si[0]?.[1]||1;
+      const se=Object.entries(ebc).sort((a,b)=>b[1]-a[1]),maxE=se[0]?.[1]||1;
+      const catRow=(type,cid,amt,total,max)=>{const c=getCat(type,cid);return `<div class="list-row">
+        <div class="row-left"><div class="row-icon">${c.emoji}</div>
+          <div><div class="row-name">${c.name}</div><div class="progress-bar" style="width:90px"><div class="progress-fill c-${type}" style="width:${Math.round(amt/max*100)}%"></div></div></div>
+        </div>
+        <div class="row-right"><div class="row-amount c-${type}">${fmt(amt)}</div><div class="row-pct">${total?Math.round(amt/total*100):0}%</div></div>
+      </div>`;};
+      return `<div class="dashboard-grid" style="margin-bottom:0">
+        <div class="card"><div class="card-title">Top Ingresos</div>${si.length?si.slice(0,5).map(([id,a])=>catRow('income',id,a,totalIncome,maxI)).join(''):'<div class="empty-state"><p>Sin ingresos</p></div>'}</div>
+        <div class="card"><div class="card-title">Top Gastos</div>${se.length?se.slice(0,5).map(([id,a])=>catRow('expense',id,a,totalExpense,maxE)).join(''):'<div class="empty-state"><p>Sin gastos</p></div>'}</div>
+      </div>`;
+    }
+    case 'upcoming': {
+      const as=subscriptions.filter(s=>s.active).sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
+      const pe=expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').sort((a,b)=>new Date(a.expectedDate)-new Date(b.expectedDate));
+      return `<div class="dashboard-grid" style="margin-bottom:0">
+        <div class="card"><div class="card-title">Próximas Suscripciones</div>
+          ${as.length?as.slice(0,5).map(s=>{const d=daysUntil(s.day);const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';const lbl=d===0?'Hoy':d===1?'Mañana':`${d}d`;return `<div class="upcoming-item">
+            <div class="row-left"><div class="row-icon">${s.emoji||'📦'}</div><div><div class="row-name">${s.name}</div><div class="row-meta">Día ${s.day}</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-expense">${fmt(s.amount)}</span><span class="days-badge ${cls}">${lbl}</span></div>
+          </div>`;}).join(''):'<div class="empty-state"><p>Sin suscripciones</p></div>'}
+        </div>
+        <div class="card"><div class="card-title">Ingresos Esperados</div>
+          ${pe.length?pe.slice(0,5).map(e=>{const sc=e.status==='overdue'?'badge-overdue':'badge-pending';const sl=e.status==='overdue'?'Vencido':'Pendiente';return `<div class="list-row">
+            <div class="row-left"><div class="row-icon">${getCat('income',e.category).emoji}</div><div><div class="row-name">${e.source}</div><div class="row-meta">${fmtDate(e.expectedDate)}</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-income">${fmt(e.amount)}</span><span class="status-badge ${sc}">${sl}</span></div>
+          </div>`;}).join(''):'<div class="empty-state"><p>Sin pendientes</p></div>'}
+        </div>
+      </div>`;
+    }
+    case 'recent': {
+      const rec=[...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+      return `<div class="card"><div class="card-title">Últimos Movimientos</div>${rec.length?rec.map(t=>txRow(t,false)).join(''):'<div class="empty-state"><div class="e-icon">📭</div><p>Sin movimientos</p></div>'}</div>`;
+    }
+    default: return '';
+  }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1344,6 +1453,90 @@ function deleteBill(id){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AHORRO E INVERSIONES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let editingSvId = null;
+const SV_TYPE_LABEL={cuenta:'Cuenta ahorros',crypto:'Cripto',fondo:'Fondo',etf:'ETF/Acciones',otros:'Otros'};
+
+function renderSavings(){
+  const total=savings.reduce((s,sv)=>s+sv.amount,0);
+  document.getElementById('savings-total-sub').textContent=`Total: ${fmt(total)}`;
+  document.getElementById('savings-total-card').innerHTML=total?`
+    <div class="savings-total-bar">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.6;margin-bottom:4px">Patrimonio total</div>
+        <div style="font-size:32px;font-weight:800;letter-spacing:-1px">${fmt(total)}</div>
+      </div>
+      <div style="text-align:right;opacity:.6;font-size:13px">${savings.length} cuenta${savings.length!==1?'s':''}</div>
+    </div>`:'';
+  document.getElementById('savings-grid').innerHTML=savings.length?savings.map(sv=>{
+    const pct=total>0?Math.round(sv.amount/total*100):0;
+    return `<div class="savings-card">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:26px">${sv.emoji||'💰'}</span>
+        <div style="display:flex;gap:2px">
+          <button class="btn-icon" onclick="openSavingsModal('${sv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn-danger-icon" onclick="deleteSavings('${sv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div>
+      </div>
+      <div style="font-size:14px;font-weight:700;letter-spacing:-.3px">${sv.name}</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.8px">${fmt(sv.amount)}</div>
+      <div style="font-size:11px;color:var(--muted)">${SV_TYPE_LABEL[sv.type]||sv.type}${sv.note?' · '+sv.note:''}</div>
+      <div style="height:3px;background:var(--border);border-radius:99px;margin-top:6px">
+        <div style="height:100%;background:var(--text);border-radius:99px;width:${pct}%"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">${pct}% del patrimonio</div>
+    </div>`;
+  }).join(''):
+  '<div class="empty-state" style="grid-column:1/-1"><div class="e-icon">🏦</div><p>Añade tus cuentas de ahorro e inversiones</p></div>';
+}
+
+function openSavingsModal(id){
+  editingSvId=id||null;
+  const sv=id?savings.find(x=>x.id===id):null;
+  document.getElementById('savings-modal-title').textContent=id?'Editar cuenta':'Nueva cuenta';
+  if(sv){
+    document.getElementById('sv-name').value=sv.name;
+    document.getElementById('sv-emoji').value=sv.emoji||'';
+    document.getElementById('sv-amount').value=sv.amount;
+    document.getElementById('sv-type').value=sv.type||'cuenta';
+    document.getElementById('sv-note').value=sv.note||'';
+  } else {
+    document.getElementById('sv-name').value='';
+    document.getElementById('sv-emoji').value='';
+    document.getElementById('sv-amount').value='';
+    document.getElementById('sv-type').value='cuenta';
+    document.getElementById('sv-note').value='';
+  }
+  openModal('modal-savings');
+}
+
+function saveSavingsEntry(){
+  const name=document.getElementById('sv-name').value.trim();
+  const emoji=document.getElementById('sv-emoji').value.trim();
+  const amount=parseFloat(document.getElementById('sv-amount').value);
+  const type=document.getElementById('sv-type').value;
+  const note=document.getElementById('sv-note').value.trim();
+  if(!name||!amount){shake('modal-savings');return;}
+  if(editingSvId){
+    const sv=savings.find(x=>x.id===editingSvId);
+    Object.assign(sv,{name,emoji,amount,type,note});
+  } else {
+    savings.push({id:uid(),name,emoji,amount,type,note});
+  }
+  save(STORE_KEYS.savings,savings);
+  closeModal('modal-savings');
+  renderSavings();
+}
+
+function deleteSavings(id){
+  if(!confirm('¿Eliminar esta cuenta?')) return;
+  savings=savings.filter(sv=>sv.id!==id);
+  save(STORE_KEYS.savings,savings);
+  renderSavings();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  CATEGORIES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let catModalType = 'income';
@@ -1438,7 +1631,8 @@ function exportData(){
       [STORE_KEYS.exp]: expectedIncome,
       [STORE_KEYS.sub]: subscriptions,
       [STORE_KEYS.cats]: categories,
-      [STORE_KEYS.bills]: bills
+      [STORE_KEYS.bills]: bills,
+      [STORE_KEYS.savings]: savings
     }
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
@@ -1466,6 +1660,7 @@ function importData(e){
       if(d[STORE_KEYS.sub]) { subscriptions = d[STORE_KEYS.sub]; save(STORE_KEYS.sub, subscriptions); }
       if(d[STORE_KEYS.cats]) { categories = d[STORE_KEYS.cats]; save(STORE_KEYS.cats, categories); }
       if(d[STORE_KEYS.bills]) { bills = d[STORE_KEYS.bills]; save(STORE_KEYS.bills, bills); }
+      if(d[STORE_KEYS.savings]) { savings = d[STORE_KEYS.savings]; save(STORE_KEYS.savings, savings); }
       showDataMsg('Datos importados correctamente. Puedes navegar a cualquier sección.', 'income');
     } catch(err) {
       showDataMsg('Error al importar: archivo no válido.', 'expense');
