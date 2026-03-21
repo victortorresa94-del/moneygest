@@ -649,6 +649,16 @@ input[type="date"]{cursor:pointer}
         </select>
       </div>
       <div class="form-group full"><label>Nota (opcional)</label><textarea id="bill-note" placeholder="Transferencia, efectivo, persona..."></textarea></div>
+      <div class="form-group full" style="border-top:1px solid var(--border);padding-top:14px;margin-top:2px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;font-weight:500;letter-spacing:0">
+          <input type="checkbox" id="bill-recurring" onchange="toggleBillRecurring(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--text)">
+          Pago recurrente (se repite cada mes)
+        </label>
+      </div>
+      <div class="form-group" id="bill-recurday-group" style="display:none">
+        <label>Día del mes que se cobra</label>
+        <input type="number" id="bill-recurday" placeholder="Ej. 1, 15, 28..." min="1" max="31">
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-bill')">Cancelar</button>
@@ -1372,10 +1382,11 @@ function renderBills(){
 
   document.getElementById('bills-list').innerHTML = list.length ? list.map(b=>{
     const due = billDueInfo(b.dueDate, b.status);
+    const recurBadge = b.recurring ? `<span style="font-size:10px;font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:2px 7px;white-space:nowrap">🔄 día ${b.recurDay||'?'}</span>` : '';
     return `<div class="bill-row ${b.status==='paid'?'bill-paid':''}">
       <div class="tx-icon" style="font-size:16px">${b.emoji||'💳'}</div>
       <div class="tx-info">
-        <div class="tx-name">${b.name}</div>
+        <div class="tx-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${b.name}${recurBadge}</div>
         <div class="tx-meta">${b.note||'&nbsp;'}</div>
       </div>
       <div class="tx-right" style="min-width:80px">
@@ -1397,10 +1408,17 @@ function renderBills(){
   }).join('') : '<div class="empty-state"><div class="e-icon">✅</div><p>Sin pagos en esta vista</p></div>';
 }
 
+function toggleBillRecurring(on){
+  document.getElementById('bill-recurday-group').style.display = on ? 'flex' : 'none';
+}
+
 function openBillModal(id){
   editingBillId=id||null;
   const b=id?bills.find(x=>x.id===id):null;
   document.getElementById('bill-modal-title').textContent=id?'Editar Pago':'Nuevo Pago Pendiente';
+  const recurring = b?.recurring||false;
+  document.getElementById('bill-recurring').checked=recurring;
+  document.getElementById('bill-recurday-group').style.display=recurring?'flex':'none';
   if(b){
     document.getElementById('bill-name').value=b.name;
     document.getElementById('bill-emoji').value=b.emoji||'';
@@ -1408,6 +1426,7 @@ function openBillModal(id){
     document.getElementById('bill-due').value=b.dueDate||'';
     document.getElementById('bill-status').value=b.status;
     document.getElementById('bill-note').value=b.note||'';
+    document.getElementById('bill-recurday').value=b.recurDay||'';
   } else {
     document.getElementById('bill-name').value='';
     document.getElementById('bill-emoji').value='';
@@ -1415,6 +1434,7 @@ function openBillModal(id){
     document.getElementById('bill-due').value='';
     document.getElementById('bill-status').value='pending';
     document.getElementById('bill-note').value='';
+    document.getElementById('bill-recurday').value='';
   }
   openModal('modal-bill');
 }
@@ -1426,12 +1446,14 @@ function saveBill(){
   const dueDate=document.getElementById('bill-due').value;
   const status=document.getElementById('bill-status').value;
   const note=document.getElementById('bill-note').value.trim();
+  const recurring=document.getElementById('bill-recurring').checked;
+  const recurDay=recurring?parseInt(document.getElementById('bill-recurday').value)||null:null;
   if(!name||!amount){shake('modal-bill');return;}
   if(editingBillId){
     const b=bills.find(x=>x.id===editingBillId);
-    Object.assign(b,{name,emoji,amount,dueDate,status,note});
+    Object.assign(b,{name,emoji,amount,dueDate,status,note,recurring,recurDay});
   } else {
-    bills.push({id:uid(),name,emoji,amount,dueDate,status,note});
+    bills.push({id:uid(),name,emoji,amount,dueDate,status,note,recurring,recurDay});
   }
   save(STORE_KEYS.bills,bills);
   closeModal('modal-bill');
