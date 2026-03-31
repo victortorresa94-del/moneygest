@@ -273,6 +273,119 @@ input[type="date"]{cursor:pointer}
   .card-title{margin-bottom:12px}
   .sub-card{padding:14px 14px}
 }
+
+/* ── AI CHATBOT ── */
+.ai-fab {
+  position: fixed; bottom: 28px; right: 24px; z-index: 150;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #5856D6, #7C3AED);
+  color: #fff; border: none; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(88,86,214,.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: transform .2s, box-shadow .2s;
+}
+.ai-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(88,86,214,.55); }
+.ai-panel-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  z-index: 160; display: none; align-items: flex-end; justify-content: center;
+}
+.ai-panel-overlay.open { display: flex; }
+.ai-panel {
+  background: var(--surface); width: 100%; max-width: 600px;
+  border-radius: 24px 24px 0 0;
+  height: 85vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.ai-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #5856D6, #7C3AED); color: #fff;
+  border-radius: 24px 24px 0 0;
+}
+.ai-panel-title { font-size: 16px; font-weight: 700; }
+.ai-panel-sub { font-size: 11px; opacity: .75; margin-top: 1px; }
+.ai-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ai-msg { max-width: 85%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.5; }
+.ai-msg.user { background: #5856D6; color: #fff; align-self: flex-end; border-radius: 16px 16px 4px 16px; }
+.ai-msg.assistant { background: var(--bg); color: var(--text); align-self: flex-start; border-radius: 16px 16px 16px 4px; }
+.ai-msg.error { background: var(--expense-bg); color: var(--expense); }
+.ai-msg.thinking { opacity: .6; font-style: italic; }
+.ai-input-bar {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 12px 16px; padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.ai-input-bar textarea {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 10px 14px; font-size: 14px; resize: none; min-height: 44px;
+  max-height: 120px; font-family: 'Inter', Arial, sans-serif;
+  background: var(--bg); color: var(--text);
+}
+.ai-input-bar textarea:focus { border-color: #5856D6; background: var(--surface); outline: none; }
+.ai-action-btn {
+  width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all .15s; font-size: 18px;
+}
+.ai-action-btn:hover { border-color: #5856D6; color: #5856D6; }
+.ai-action-btn.recording { background: var(--expense-bg); border-color: var(--expense); color: var(--expense); animation: pulse 1s infinite; }
+.ai-send-btn {
+  width: 44px; height: 44px; border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #5856D6, #7C3AED); color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s;
+}
+.ai-send-btn:hover { opacity: .85; }
+.ai-image-preview {
+  padding: 8px 16px 0; display: flex; gap: 8px; flex-wrap: wrap;
+}
+.ai-img-thumb {
+  position: relative; width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
+}
+.ai-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ai-img-remove {
+  position: absolute; top: 2px; right: 2px; width: 18px; height: 18px;
+  border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
+  border: none; cursor: pointer; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+/* Profile switcher */
+.profile-section { padding: 0 20px 12px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.profile-chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: background .15s; }
+.profile-chip:hover { background: var(--bg); }
+.profile-chip.active { background: var(--accent-bg); }
+.profile-check { margin-left: auto; color: var(--accent); font-size: 16px; }
+.profile-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px 3px 6px; border-radius: 99px;
+  background: var(--accent-bg); color: var(--accent);
+  font-size: 11px; font-weight: 700; cursor: pointer;
+}
+
+/* ── DESKTOP ENHANCEMENTS ── */
+@media(min-width:1024px) {
+  .main { padding: 32px 48px; }
+  .dashboard-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid { grid-template-columns: repeat(4,1fr); }
+  /* AI chat panel on desktop: right-side panel, not full screen */
+  .ai-panel {
+    position: fixed; right: 24px; bottom: 24px;
+    width: 400px; height: 600px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+  }
+  .ai-panel-overlay { background: transparent; pointer-events: none; }
+  .ai-panel-overlay.open { display: flex; }
+  .ai-panel { pointer-events: all; }
+}
+@media(max-width:700px) {
+  .ai-fab { bottom: calc(80px + env(safe-area-inset-bottom)); right: 16px; }
+}
 </style>
 </head>
 <body>
@@ -338,23 +451,7 @@ input[type="date"]{cursor:pointer}
 <div class="overlay" id="more-overlay" onclick="if(event.target===this) closeMore()" style="align-items:flex-end">
   <div class="more-sheet">
     <div class="more-handle"></div>
-    <div class="more-title">Más secciones</div>
-    <div class="more-item" onclick="goTo('savings');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
-      Ahorro e Inversiones
-    </div>
-    <div class="more-item" onclick="goTo('expected');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-      Ingresos Esperados
-    </div>
-    <div class="more-item" onclick="goTo('categories');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
-      Categorías
-    </div>
-    <div class="more-item" onclick="goTo('data');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Datos / Backup
-    </div>
+    <div id="more-drawer-content"></div>
   </div>
 </div>
 
@@ -365,7 +462,10 @@ input[type="date"]{cursor:pointer}
   <div id="page-dashboard" class="page active">
     <div class="page-header" style="margin-bottom:16px">
       <div>
-        <div class="page-title">Dashboard</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="page-title">Dashboard</div>
+          <span class="profile-badge" id="profile-badge" onclick="openMore()">👤 Personal</span>
+        </div>
         <div class="page-sub" id="dash-period"></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
@@ -499,6 +599,17 @@ input[type="date"]{cursor:pointer}
   <div id="page-data" class="page">
     <div class="page-header">
       <div><div class="page-title">Datos</div><div class="page-sub">Exporta o importa tus datos para no perderlos nunca</div></div>
+    </div>
+    <div class="card" style="margin-bottom:20px;max-width:760px">
+      <div class="card-title">⚡ Asistente IA</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>OpenRouter API Key</label>
+        <input type="password" id="ai-api-key-input" placeholder="sk-or-v1-..." autocomplete="off">
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
+        Obtén tu key gratis en <strong>openrouter.ai</strong> — se guarda solo en este dispositivo, nunca se sube a internet.
+      </div>
+      <button class="btn btn-primary" onclick="saveAiApiKey()">Guardar key</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:760px">
       <div class="card">
@@ -680,6 +791,60 @@ input[type="date"]{cursor:pointer}
   </div>
 </div>
 
+<!-- AI FAB -->
+<button class="ai-fab" onclick="toggleAiPanel()" id="ai-fab" title="Asistente IA">⚡</button>
+
+<!-- AI PANEL -->
+<div class="ai-panel-overlay" id="ai-panel-overlay" onclick="if(event.target===this)toggleAiPanel()">
+  <div class="ai-panel" id="ai-panel">
+    <div class="ai-panel-header">
+      <div>
+        <div class="ai-panel-title">⚡ Asistente IA</div>
+        <div class="ai-panel-sub">Describe tus gastos, ingresos o pásame un pantallazo</div>
+      </div>
+      <button onclick="toggleAiPanel()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center">&times;</button>
+    </div>
+    <div class="ai-messages" id="ai-messages">
+      <div class="ai-msg assistant">¡Hola! Cuéntame tus movimientos en lenguaje natural. Por ejemplo: <em>"Me he gastado 200€ en Mercadona, he cobrado 883€ de factura y he pagado Netflix"</em> 💸<br><br>También puedes enviarme un 📷 pantallazo de tu banco.</div>
+    </div>
+    <div class="ai-image-preview" id="ai-image-preview"></div>
+    <div class="ai-input-bar">
+      <textarea id="ai-input" placeholder="Describe tus movimientos..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMessage()}"></textarea>
+      <button class="ai-action-btn" id="ai-mic-btn" onclick="toggleVoiceInput()" title="Micrófono">🎤</button>
+      <label class="ai-action-btn" title="Imagen" style="cursor:pointer">
+        📷<input type="file" id="ai-image-input" accept="image/*" style="display:none" multiple onchange="handleAiImages(this.files)">
+      </label>
+      <button class="ai-send-btn" onclick="sendAiMessage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="overlay" id="modal-profile">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo perfil</div>
+      <button class="close-btn" onclick="closeModal('modal-profile')">&times;</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nombre</label><input type="text" id="profile-name" placeholder="Ej. Aether Labs"></div>
+      <div class="form-group"><label>Emoji</label><input type="text" id="profile-emoji" placeholder="🏢" maxlength="4"></div>
+      <div class="form-group full"><label>Tipo</label>
+        <select id="profile-type">
+          <option value="personal">Personal</option>
+          <option value="business">Empresa / Negocio</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-profile')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNewProfile()">Crear perfil</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── MODAL: CATEGORY ── -->
 <div class="overlay" id="modal-cat">
   <div class="modal">
@@ -702,7 +867,15 @@ input[type="date"]{cursor:pointer}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const STORE_KEYS = {tx:'fnz_tx',exp:'fnz_exp',sub:'fnz_sub',cats:'fnz_cats',bills:'fnz_bills',savings:'fnz_savings',dash:'fnz_dash'};
+function getStoreKeys() {
+  const pid = localStorage.getItem('fnz_active_profile') || 'personal';
+  return {
+    tx: `fnz_${pid}_tx`, exp: `fnz_${pid}_exp`, sub: `fnz_${pid}_sub`,
+    cats: `fnz_${pid}_cats`, bills: `fnz_${pid}_bills`,
+    savings: `fnz_${pid}_savings`, dash: `fnz_${pid}_dash`
+  };
+}
+let STORE_KEYS = getStoreKeys();
 
 const DEFAULT_CATS = {
   income:[
@@ -842,7 +1015,7 @@ function goTo(page){
   currentPage = page;
   renderPage(page);
 }
-function openMore(){document.getElementById('more-overlay').classList.add('open')}
+function openMore(){renderMoreDrawer();document.getElementById('more-overlay').classList.add('open')}
 function closeMore(){document.getElementById('more-overlay').classList.remove('open')}
 function renderPage(p){
   if(p==='dashboard') renderDashboard();
@@ -852,7 +1025,7 @@ function renderPage(p){
   else if(p==='categories') renderCategories();
   else if(p==='bills') renderBills();
   else if(p==='savings') renderSavings();
-  // 'data' page is static, nothing to render
+  else if(p==='data') renderDataPage();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1758,6 +1931,38 @@ function showDataMsg(text, type){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  LOAD ALL DATA (profile-aware)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loadAllData(){
+  STORE_KEYS = getStoreKeys();
+  transactions = load(STORE_KEYS.tx,[]);
+  expectedIncome = load(STORE_KEYS.exp,[]);
+  subscriptions = load(STORE_KEYS.sub,[]);
+  categories = load(STORE_KEYS.cats, DEFAULT_CATS);
+  bills = load(STORE_KEYS.bills,[]);
+  savings = load(STORE_KEYS.savings,[]);
+  dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
+  DEFAULT_DASH.order.forEach(b=>{ if(!dashConfig.order.includes(b)&&!dashConfig.hidden.includes(b)) dashConfig.order.push(b); });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TOAST
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showToast(msg){
+  let t = document.getElementById('toast-el');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'toast-el';
+    t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1C1C1E;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._to);
+  t._to = setTimeout(()=>{ t.style.opacity='0'; }, 2500);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function updateBillsBadge(){
@@ -1765,8 +1970,294 @@ function updateBillsBadge(){
   const badge = document.getElementById('bills-badge');
   if(badge){ badge.textContent = n||''; badge.style.display = n?'block':'none'; }
 }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  PROFILES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getProfiles() {
+  return load('fnz_profiles') || [{id:'personal',name:'Personal',emoji:'👤',type:'personal'}];
+}
+function getActiveProfile() {
+  return localStorage.getItem('fnz_active_profile') || 'personal';
+}
+function switchProfile(id) {
+  localStorage.setItem('fnz_active_profile', id);
+  loadAllData();
+  renderDashboard();
+  goTo('dashboard');
+  updateProfileUI();
+  closeMore();
+}
+function updateProfileUI() {
+  const pid = getActiveProfile();
+  const profiles = getProfiles();
+  const p = profiles.find(x=>x.id===pid) || profiles[0];
+  const badge = document.getElementById('profile-badge');
+  if(badge) badge.innerHTML = `${p.emoji} ${p.name}`;
+}
+function saveNewProfile() {
+  const name = document.getElementById('profile-name').value.trim();
+  const emoji = document.getElementById('profile-emoji').value.trim() || '👤';
+  const type = document.getElementById('profile-type').value;
+  if(!name){ shake('modal-profile'); return; }
+  const profiles = getProfiles();
+  const id = 'p' + Date.now();
+  profiles.push({id, name, emoji, type});
+  save('fnz_profiles', profiles);
+  closeModal('modal-profile');
+  renderMoreDrawer();
+  showToast('Perfil creado ✓');
+}
+function renderMoreDrawer() {
+  const pid = getActiveProfile();
+  const profiles = getProfiles();
+  const profilesHtml = profiles.map(p=>`
+    <div class="profile-chip ${p.id===pid?'active':''}" onclick="switchProfile('${p.id}')">
+      <span style="font-size:20px">${p.emoji}</span>
+      <span style="font-size:14px;font-weight:600">${p.name}</span>
+      ${p.id===pid?'<span class="profile-check">✓</span>':''}
+    </div>`).join('');
+  document.getElementById('more-drawer-content').innerHTML = `
+    <div class="profile-section">
+      <div class="more-title" style="padding:0 0 8px">Perfiles</div>
+      ${profilesHtml}
+      <div class="profile-chip" onclick="openModal('modal-profile')">
+        <span style="font-size:20px;opacity:.5">+</span>
+        <span style="font-size:14px;color:var(--muted)">Nuevo perfil</span>
+      </div>
+    </div>
+    <div class="more-item" onclick="goTo('savings');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
+      Ahorro e Inversiones
+    </div>
+    <div class="more-item" onclick="goTo('expected');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Ingresos Esperados
+    </div>
+    <div class="more-item" onclick="goTo('categories');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
+      Categorías
+    </div>
+    <div class="more-item" onclick="goTo('data');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Datos / Backup
+    </div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AI ASSISTANT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let aiPanelOpen = false;
+let aiImages = [];
+let voiceRecognition = null;
+
+function toggleAiPanel() {
+  aiPanelOpen = !aiPanelOpen;
+  document.getElementById('ai-panel-overlay').classList.toggle('open', aiPanelOpen);
+  if(aiPanelOpen) document.getElementById('ai-input').focus();
+}
+
+function handleAiImages(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result.split(',')[1];
+      aiImages.push({file, base64, type: file.type, dataUrl: e.target.result});
+      renderAiImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('ai-image-input').value = '';
+}
+
+function renderAiImagePreviews() {
+  const container = document.getElementById('ai-image-preview');
+  container.innerHTML = aiImages.map((img, i) => `
+    <div class="ai-img-thumb">
+      <img src="${img.dataUrl}" alt="imagen">
+      <button class="ai-img-remove" onclick="removeAiImage(${i})">&times;</button>
+    </div>`).join('');
+}
+
+function removeAiImage(i) {
+  aiImages.splice(i, 1);
+  renderAiImagePreviews();
+}
+
+function addAiMessage(role, text) {
+  const container = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.innerHTML = text.replace(/\n/g, '<br>');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+async function sendAiMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if(!text && aiImages.length === 0) return;
+
+  const apiKey = localStorage.getItem('fnz_openrouter_key');
+  if(!apiKey) {
+    addAiMessage('error', '⚠️ No tienes configurada la API key. Ve a <strong>Datos → Asistente IA</strong> para añadirla.');
+    return;
+  }
+
+  const displayText = text || `📷 ${aiImages.length} imagen(es)`;
+  addAiMessage('user', displayText);
+  input.value = '';
+
+  const thinkingDiv = addAiMessage('thinking', '⏳ Procesando...');
+
+  try {
+    const hasImages = aiImages.length > 0;
+    const model = hasImages ? 'google/gemini-flash-1.5:free' : 'qwen/qwen3.6-plus-preview:free';
+
+    const systemPrompt = hasImages
+      ? `Eres un asistente que analiza capturas de pantalla de extractos bancarios y apps financieras. Extrae TODAS las transacciones visibles y devuelve SOLO un JSON válido sin markdown:\n{"actions":[{"type":"add_expense","amount":45.99,"description":"Mercadona","category":"alimentación"},{"type":"add_income","amount":2500,"description":"Nómina","category":"trabajo"}],"summary":"He encontrado X transacciones en el extracto."}\nPara cargos/débitos usa add_expense. Para abonos/créditos usa add_income. Devuelve SOLO el JSON.`
+      : `Eres el asistente de MoneyGest, app de finanzas personales. El usuario describe transacciones en español. Extrae la información y devuelve SOLO un JSON válido sin markdown:\n{"actions":[{"type":"add_expense","amount":200,"description":"Compras Zara","category":"ropa"},{"type":"add_income","amount":883,"description":"Factura cliente","category":"trabajo"},{"type":"add_saving","name":"Bitcoin","amount":50,"fromIncome":true},{"type":"mark_bill_paid","name":"Netflix"},{"type":"add_bill","name":"Alquiler","amount":800,"emoji":"🏠"}],"summary":"Resumen de lo procesado..."}\nTipos: add_expense, add_income, add_saving, mark_bill_paid, add_bill. Devuelve SOLO el JSON sin texto adicional.`;
+
+    let messages;
+    if(hasImages) {
+      const content = [];
+      if(text) content.push({type:'text', text});
+      aiImages.forEach(img => content.push({type:'image_url', image_url:{url:`data:${img.type};base64,${img.base64}`}}));
+      messages = [{role:'system', content: systemPrompt}, {role:'user', content}];
+    } else {
+      messages = [{role:'system', content: systemPrompt}, {role:'user', content: text}];
+    }
+
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': location.origin
+      },
+      body: JSON.stringify({model, messages, temperature: 0.1})
+    });
+
+    if(!resp.ok) {
+      const err = await resp.text();
+      throw new Error(`API error ${resp.status}: ${err}`);
+    }
+
+    const data = await resp.json();
+    const rawContent = data.choices?.[0]?.message?.content || '';
+
+    let parsed;
+    try {
+      const jsonStr = rawContent.replace(/```json?\n?/g,'').replace(/```/g,'').trim();
+      parsed = JSON.parse(jsonStr);
+    } catch(e) {
+      throw new Error('No pude interpretar la respuesta. Inténtalo de nuevo.');
+    }
+
+    thinkingDiv.remove();
+
+    let executedCount = 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    (parsed.actions || []).forEach(action => {
+      const SK = getStoreKeys();
+      if(action.type === 'add_expense' || action.type === 'add_income') {
+        const type = action.type === 'add_expense' ? 'expense' : 'income';
+        const cat = categories[type]?.find(c => c.name.toLowerCase().includes((action.category||'').toLowerCase()));
+        transactions.push({
+          id: uid(), type, amount: parseFloat(action.amount)||0,
+          description: action.description || (type==='expense'?'Gasto':'Ingreso'),
+          category: cat?.id || (type==='expense' ? categories.expense[0]?.id : categories.income[0]?.id),
+          date: todayStr, note: ''
+        });
+        save(SK.tx, transactions);
+        executedCount++;
+      } else if(action.type === 'add_saving') {
+        const existing = savings.find(s => s.name.toLowerCase() === (action.name||'').toLowerCase());
+        if(existing) {
+          existing.amount = parseFloat(action.amount) || existing.amount;
+          existing.fromIncome = action.fromIncome !== false;
+        } else {
+          savings.push({id:uid(), name:action.name||'Ahorro', emoji:'💰', amount:parseFloat(action.amount)||0, type:'cuenta', note:'', fromIncome: action.fromIncome !== false});
+        }
+        save(SK.savings, savings);
+        executedCount++;
+      } else if(action.type === 'mark_bill_paid') {
+        const bill = bills.find(b => b.name.toLowerCase().includes((action.name||'').toLowerCase()));
+        if(bill){ bill.status = 'paid'; save(SK.bills, bills); executedCount++; }
+      } else if(action.type === 'add_bill') {
+        bills.push({id:uid(), name:action.name||'Pago', emoji:action.emoji||'💳', amount:parseFloat(action.amount)||0, dueDate:'', note:'', status:'pending'});
+        save(SK.bills, bills);
+        executedCount++;
+      }
+    });
+
+    aiImages = [];
+    renderAiImagePreviews();
+
+    const summary = parsed.summary || `He procesado ${executedCount} acción(es).`;
+    addAiMessage('assistant', `✅ ${summary}`);
+
+    renderDashboard();
+    if(document.getElementById('page-transactions').classList.contains('active')) renderTransactions();
+    if(document.getElementById('page-bills').classList.contains('active')) renderBills();
+    updateBillsBadge();
+
+  } catch(e) {
+    thinkingDiv.remove();
+    addAiMessage('error', `❌ Error: ${e.message}`);
+  }
+}
+
+function toggleVoiceInput() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) {
+    addAiMessage('error', '❌ Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.');
+    return;
+  }
+  if(voiceRecognition) {
+    voiceRecognition.stop();
+    voiceRecognition = null;
+    document.getElementById('ai-mic-btn').classList.remove('recording');
+    return;
+  }
+  const rec = new SR();
+  rec.lang = 'es-ES';
+  rec.continuous = false;
+  rec.interimResults = false;
+  voiceRecognition = rec;
+  document.getElementById('ai-mic-btn').classList.add('recording');
+  rec.onresult = e => {
+    document.getElementById('ai-input').value = e.results[0][0].transcript;
+    document.getElementById('ai-mic-btn').classList.remove('recording');
+    voiceRecognition = null;
+  };
+  rec.onerror = () => {
+    document.getElementById('ai-mic-btn').classList.remove('recording');
+    voiceRecognition = null;
+  };
+  rec.onend = () => {
+    document.getElementById('ai-mic-btn').classList.remove('recording');
+    voiceRecognition = null;
+  };
+  rec.start();
+}
+
+function renderDataPage() {
+  const keyInput = document.getElementById('ai-api-key-input');
+  if(keyInput) keyInput.value = localStorage.getItem('fnz_openrouter_key') || '';
+}
+
+function saveAiApiKey() {
+  const val = document.getElementById('ai-api-key-input').value.trim();
+  localStorage.setItem('fnz_openrouter_key', val);
+  showToast('API key guardada ✓');
+}
+
 renderDashboard();
 updateBillsBadge();
+updateProfileUI();
 </script>
 </body>
 </html>
