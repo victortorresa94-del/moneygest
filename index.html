@@ -386,6 +386,26 @@ input[type="date"]{cursor:pointer}
 @media(max-width:700px) {
   .ai-fab { bottom: calc(80px + env(safe-area-inset-bottom)); right: 16px; }
 }
+
+/* ── BUSINESS DASHBOARD ── */
+.biz-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.biz-kpi { background: var(--surface); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.biz-kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 8px; }
+.biz-kpi-value { font-size: 22px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.biz-kpi-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.iva-card { border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.iva-card.repercutido { background: linear-gradient(135deg, #e8f5e9, #f1f8e9); border: 1px solid #c8e6c9; }
+.iva-card.soportado { background: linear-gradient(135deg, #e3f2fd, #e8eaf6); border: 1px solid #bbdefb; }
+.iva-card.liquidar { background: linear-gradient(135deg, #fff8e1, #fff3e0); border: 1px solid #ffe082; }
+.iva-card.liquidar.negative { background: linear-gradient(135deg, #e8f5e9, #edfbf5); border: 1px solid #a5d6a7; }
+.invoice-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.invoice-row:last-child { border-bottom: none; }
+@media(max-width:700px) {
+  .biz-kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+}
+@media(max-width:400px) {
+  .biz-kpi-grid { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -410,6 +430,10 @@ input[type="date"]{cursor:pointer}
   <div class="nav-item" onclick="goTo('subscriptions')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
     <span>Suscripciones</span>
+  </div>
+  <div class="nav-item" onclick="goTo('invoices')" id="nav-invoices" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <span>Facturas</span>
   </div>
   <div class="nav-item" onclick="goTo('savings')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
@@ -631,6 +655,24 @@ input[type="date"]{cursor:pointer}
       </div>
     </div>
     <div id="data-msg" style="margin-top:20px;max-width:760px"></div>
+  </div>
+
+  <!-- ── FACTURAS (EMPRESA) ── -->
+  <div id="page-invoices" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Facturas</div><div class="page-sub">Gestión de facturas emitidas</div></div>
+      <button class="btn btn-primary" onclick="openInvoiceModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Nueva factura
+      </button>
+    </div>
+    <!-- IVA Summary bar -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px" id="iva-summary-bar"></div>
+    <!-- Invoices list -->
+    <div class="card">
+      <div class="card-title">Facturas emitidas</div>
+      <div id="invoices-list"></div>
+    </div>
   </div>
 
 </main>
@@ -863,6 +905,52 @@ input[type="date"]{cursor:pointer}
   </div>
 </div>
 
+<!-- MODAL: INVOICE -->
+<div class="overlay" id="modal-invoice">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="invoice-modal-title">Nueva Factura</div>
+      <button class="close-btn" onclick="closeModal('modal-invoice')">&times;</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Cliente</label><input type="text" id="inv-client" placeholder="Nombre del cliente o empresa"></div>
+      <div class="form-group"><label>Nº Factura</label><input type="text" id="inv-num" placeholder="FAC-001"></div>
+      <div class="form-group"><label>Fecha</label><input type="date" id="inv-date"></div>
+      <div class="form-group"><label>Base imponible (€)</label><input type="number" id="inv-base" placeholder="0.00" step="0.01" min="0" oninput="calcInvTotal()"></div>
+      <div class="form-group"><label>IVA (%)</label>
+        <select id="inv-iva" onchange="calcInvTotal()">
+          <option value="21">21% (general)</option>
+          <option value="10">10% (reducido)</option>
+          <option value="4">4% (superreducido)</option>
+          <option value="0">0% (exento)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>IRPF ret. (%)</label>
+        <select id="inv-irpf">
+          <option value="0">0% (sin retención)</option>
+          <option value="15">15%</option>
+          <option value="7">7% (nuevo autónomo)</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Total factura</label>
+        <div id="inv-total-display" style="font-size:22px;font-weight:800;color:var(--income);padding:8px 0">€ 0.00</div>
+      </div>
+      <div class="form-group"><label>Estado</label>
+        <select id="inv-status">
+          <option value="pending">Pendiente de cobro</option>
+          <option value="paid">Cobrada</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Descripción (opcional)</label><textarea id="inv-desc" placeholder="Servicios de desarrollo web..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-invoice')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">Guardar factura</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
@@ -900,10 +988,31 @@ function getStoreKeys() {
   return {
     tx: `fnz_${pid}_tx`, exp: `fnz_${pid}_exp`, sub: `fnz_${pid}_sub`,
     cats: `fnz_${pid}_cats`, bills: `fnz_${pid}_bills`,
-    savings: `fnz_${pid}_savings`, dash: `fnz_${pid}_dash`
+    savings: `fnz_${pid}_savings`, dash: `fnz_${pid}_dash`,
+    invoices: `fnz_${pid}_invoices`
   };
 }
 let STORE_KEYS = getStoreKeys();
+
+const DEFAULT_BIZ_CATS = {
+  income: [
+    {id:'bi1', name:'Facturas clientes', emoji:'📋'},
+    {id:'bi2', name:'Proyectos', emoji:'🎯'},
+    {id:'bi3', name:'Consultoría', emoji:'🧠'},
+    {id:'bi4', name:'Licencias/SaaS', emoji:'💿'},
+    {id:'bi5', name:'Otros ingresos', emoji:'💰'},
+  ],
+  expense: [
+    {id:'be1', name:'Software/SaaS', emoji:'💻'},
+    {id:'be2', name:'Marketing', emoji:'📣'},
+    {id:'be3', name:'Material/Hardware', emoji:'🖥️'},
+    {id:'be4', name:'Servicios externos', emoji:'🤝'},
+    {id:'be5', name:'Gastos operativos', emoji:'⚙️'},
+    {id:'be6', name:'Dietas/Viajes', emoji:'✈️'},
+    {id:'be7', name:'Asesoría/Legal', emoji:'⚖️'},
+    {id:'be8', name:'Alquiler/Coworking', emoji:'🏢'},
+  ]
+};
 
 const DEFAULT_CATS = {
   income:[
@@ -934,6 +1043,7 @@ let subscriptions = load(STORE_KEYS.sub,[]);
 let categories = load(STORE_KEYS.cats, DEFAULT_CATS);
 let bills = load(STORE_KEYS.bills,[]);
 let savings = load(STORE_KEYS.savings,[]);
+let invoices = [];
 const DEFAULT_DASH = {order:['patrimonio','stats','pending-bills','top-cats','upcoming','recent'],hidden:[]};
 let dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
 // Ensure all default blocks exist (migration safety)
@@ -1027,7 +1137,7 @@ function monthLabel(y,m){
 //  NAVIGATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let currentPage = 'dashboard';
-const MORE_PAGES = ['expected','categories','data','savings'];
+const MORE_PAGES = ['expected','categories','data','savings','invoices'];
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1054,6 +1164,7 @@ function renderPage(p){
   else if(p==='bills') renderBills();
   else if(p==='savings') renderSavings();
   else if(p==='data') renderDataPage();
+  else if(p==='invoices') renderInvoices();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1111,6 +1222,13 @@ function renderDashboard(){
   document.getElementById('month-label').textContent = monthLabel(viewYear,viewMonth);
   document.getElementById('dash-period').textContent = monthLabel(viewYear,viewMonth);
 
+  // Use business default blocks if business profile and using default config
+  const profileType = getActiveProfileType();
+  const BIZ_DEFAULT_ORDER = ['biz-resumen', 'biz-iva', 'biz-irpf', 'biz-facturas', 'biz-gastos-cat', 'biz-subs'];
+  if (profileType === 'business' && dashConfig.order.every(b => !b.startsWith('biz-'))) {
+    dashConfig = { order: BIZ_DEFAULT_ORDER, hidden: [] };
+  }
+
   // Edit bar
   const editBar = document.getElementById('dash-editing-bar');
   if(dashEditing){
@@ -1131,7 +1249,7 @@ function renderDashboard(){
       ${idx<dashConfig.order.length-1?`<button class="btn-icon" onclick="moveDashBlock(${idx},1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>`:''}
       <button class="btn-danger-icon" onclick="hideDashBlock('${blockId}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>` : '';
-    return `<div class="dash-block" data-block="${blockId}">${ctrl}${getDashBlock(blockId)}</div>`;
+    return `<div class="dash-block" data-block="${blockId}">${ctrl}${blockId.startsWith('biz-') ? getBizDashBlock(blockId) : getDashBlock(blockId)}</div>`;
   }).join('');
 }
 
@@ -1966,9 +2084,11 @@ function loadAllData(){
   transactions = load(STORE_KEYS.tx,[]);
   expectedIncome = load(STORE_KEYS.exp,[]);
   subscriptions = load(STORE_KEYS.sub,[]);
-  categories = load(STORE_KEYS.cats, DEFAULT_CATS);
+  const profileType = getActiveProfileType();
+  categories = load(STORE_KEYS.cats, profileType === 'business' ? DEFAULT_BIZ_CATS : DEFAULT_CATS);
   bills = load(STORE_KEYS.bills,[]);
   savings = load(STORE_KEYS.savings,[]);
+  invoices = load(STORE_KEYS.invoices, []);
   dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
   DEFAULT_DASH.order.forEach(b=>{ if(!dashConfig.order.includes(b)&&!dashConfig.hidden.includes(b)) dashConfig.order.push(b); });
 }
@@ -2008,6 +2128,11 @@ function getProfiles() {
 function getActiveProfile() {
   return localStorage.getItem('fnz_active_profile') || 'personal';
 }
+function getActiveProfileType() {
+  const pid = localStorage.getItem('fnz_active_profile') || 'personal';
+  const profiles = getProfiles();
+  return profiles.find(p => p.id === pid)?.type || 'personal';
+}
 function switchProfile(id) {
   localStorage.setItem('fnz_active_profile', id);
   loadAllData();
@@ -2022,6 +2147,8 @@ function updateProfileUI() {
   const p = profiles.find(x=>x.id===pid) || profiles[0];
   const badge = document.getElementById('profile-badge');
   if(badge) badge.innerHTML = `${p.emoji} ${p.name}`;
+  const navInv = document.getElementById('nav-invoices');
+  if (navInv) navInv.style.display = p.type === 'business' ? '' : 'none';
 }
 function saveNewProfile() {
   const name = document.getElementById('profile-name').value.trim();
@@ -2045,6 +2172,24 @@ function renderMoreDrawer() {
       <span style="font-size:14px;font-weight:600">${p.name}</span>
       ${p.id===pid?'<span class="profile-check">✓</span>':''}
     </div>`).join('');
+  const profileType = getActiveProfileType();
+  const extraItems = profileType === 'business' ? `
+  <div class="more-item" onclick="goTo('invoices');closeMore()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Facturas
+  </div>
+  <div class="more-item" onclick="goTo('subscriptions');closeMore()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
+    Suscripciones
+  </div>` : `
+  <div class="more-item" onclick="goTo('savings');closeMore()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
+    Ahorro e Inversiones
+  </div>
+  <div class="more-item" onclick="goTo('expected');closeMore()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Ingresos Esperados
+  </div>`;
   document.getElementById('more-drawer-content').innerHTML = `
     <div class="profile-section">
       <div class="more-title" style="padding:0 0 8px">Perfiles</div>
@@ -2054,14 +2199,7 @@ function renderMoreDrawer() {
         <span style="font-size:14px;color:var(--muted)">Nuevo perfil</span>
       </div>
     </div>
-    <div class="more-item" onclick="goTo('savings');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
-      Ahorro e Inversiones
-    </div>
-    <div class="more-item" onclick="goTo('expected');closeMore()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-      Ingresos Esperados
-    </div>
+    ${extraItems}
     <div class="more-item" onclick="goTo('categories');closeMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
       Categorías
@@ -2286,6 +2424,294 @@ function saveAiApiKey() {
 renderDashboard();
 updateBillsBadge();
 updateProfileUI();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INVOICES (FACTURAS)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let editingInvId = null;
+
+function calcInvTotal() {
+  const base = parseFloat(document.getElementById('inv-base').value) || 0;
+  const ivaRate = parseFloat(document.getElementById('inv-iva').value) || 0;
+  const total = base + (base * ivaRate / 100);
+  document.getElementById('inv-total-display').textContent = `€ ${total.toFixed(2)}`;
+}
+
+function openInvoiceModal(id) {
+  editingInvId = id || null;
+  const inv = id ? invoices.find(x => x.id === id) : null;
+  document.getElementById('invoice-modal-title').textContent = id ? 'Editar Factura' : 'Nueva Factura';
+  const today = new Date().toISOString().split('T')[0];
+  if (inv) {
+    document.getElementById('inv-client').value = inv.client || '';
+    document.getElementById('inv-num').value = inv.num || '';
+    document.getElementById('inv-date').value = inv.date || today;
+    document.getElementById('inv-base').value = inv.base || '';
+    document.getElementById('inv-iva').value = inv.ivaRate ?? 21;
+    document.getElementById('inv-irpf').value = inv.irpfRate ?? 0;
+    document.getElementById('inv-status').value = inv.status || 'pending';
+    document.getElementById('inv-desc').value = inv.desc || '';
+  } else {
+    document.getElementById('inv-client').value = '';
+    document.getElementById('inv-num').value = 'FAC-' + String(invoices.length + 1).padStart(3, '0');
+    document.getElementById('inv-date').value = today;
+    document.getElementById('inv-base').value = '';
+    document.getElementById('inv-iva').value = '21';
+    document.getElementById('inv-irpf').value = '0';
+    document.getElementById('inv-status').value = 'pending';
+    document.getElementById('inv-desc').value = '';
+  }
+  calcInvTotal();
+  openModal('modal-invoice');
+}
+
+function saveInvoice() {
+  const client = document.getElementById('inv-client').value.trim();
+  const base = parseFloat(document.getElementById('inv-base').value);
+  if (!client || !base) { shake('modal-invoice'); return; }
+  const ivaRate = parseFloat(document.getElementById('inv-iva').value);
+  const irpfRate = parseFloat(document.getElementById('inv-irpf').value);
+  const ivaAmt = base * ivaRate / 100;
+  const irpfAmt = base * irpfRate / 100;
+  const total = base + ivaAmt - irpfAmt;
+  const entry = {
+    id: editingInvId || uid(),
+    client,
+    num: document.getElementById('inv-num').value.trim(),
+    date: document.getElementById('inv-date').value,
+    base, ivaRate, ivaAmt, irpfRate, irpfAmt, total,
+    status: document.getElementById('inv-status').value,
+    desc: document.getElementById('inv-desc').value.trim()
+  };
+  if (editingInvId) {
+    const idx = invoices.findIndex(x => x.id === editingInvId);
+    invoices[idx] = entry;
+  } else {
+    invoices.push(entry);
+  }
+  save(STORE_KEYS.invoices, invoices);
+  closeModal('modal-invoice');
+  renderInvoices();
+  renderDashboard();
+}
+
+function deleteInvoice(id) {
+  if (!confirm('¿Eliminar esta factura?')) return;
+  invoices = invoices.filter(x => x.id !== id);
+  save(STORE_KEYS.invoices, invoices);
+  renderInvoices();
+  renderDashboard();
+}
+
+function toggleInvoiceStatus(id) {
+  const inv = invoices.find(x => x.id === id);
+  if (!inv) return;
+  inv.status = inv.status === 'paid' ? 'pending' : 'paid';
+  save(STORE_KEYS.invoices, invoices);
+  renderInvoices();
+  renderDashboard();
+}
+
+function renderInvoices() {
+  // IVA summary
+  const allInv = invoices;
+  const ivaRepercutido = allInv.reduce((s, i) => s + (i.ivaAmt || 0), 0);
+  // IVA soportado: transactions marked with IVA (expenses with ivaAmt)
+  const ivaSoportado = transactions.filter(t => t.type === 'expense' && t.ivaAmt).reduce((s, t) => s + t.ivaAmt, 0);
+  const ivaLiquidar = ivaRepercutido - ivaSoportado;
+  const summaryEl = document.getElementById('iva-summary-bar');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <div class="iva-card repercutido">
+        <div class="biz-kpi-label">IVA repercutido</div>
+        <div class="biz-kpi-value c-income">${fmt(ivaRepercutido)}</div>
+        <div class="biz-kpi-sub">Cobrado a clientes</div>
+      </div>
+      <div class="iva-card soportado">
+        <div class="biz-kpi-label">IVA soportado</div>
+        <div class="biz-kpi-value" style="color:#1565C0">${fmt(ivaSoportado)}</div>
+        <div class="biz-kpi-sub">Pagado en gastos</div>
+      </div>
+      <div class="iva-card liquidar ${ivaLiquidar < 0 ? 'negative' : ''}">
+        <div class="biz-kpi-label">IVA a ${ivaLiquidar < 0 ? 'recuperar' : 'ingresar'}</div>
+        <div class="biz-kpi-value ${ivaLiquidar < 0 ? 'c-income' : 'c-expense'}">${fmt(Math.abs(ivaLiquidar))}</div>
+        <div class="biz-kpi-sub">Liquidación trimestral</div>
+      </div>`;
+  }
+  const listEl = document.getElementById('invoices-list');
+  if (!listEl) return;
+  if (!allInv.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="e-icon">📋</div><p>Sin facturas — crea tu primera factura</p></div>';
+    return;
+  }
+  listEl.innerHTML = [...allInv].reverse().map(inv => `
+    <div class="invoice-row ${inv.status === 'paid' ? '' : ''}">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:600">${inv.client}</span>
+          <span style="font-size:10px;color:var(--muted);font-weight:600">${inv.num || ''}</span>
+          <span class="bill-due ${inv.status === 'paid' ? 'bill-due-paid' : 'bill-due-urgent'}" style="cursor:pointer" onclick="toggleInvoiceStatus('${inv.id}')">${inv.status === 'paid' ? '✓ Cobrada' : 'Pendiente'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${inv.date} · Base: ${fmt(inv.base)} + IVA ${inv.ivaRate}% = <strong>${fmt(inv.total)}</strong>${inv.irpfRate > 0 ? ` · IRPF -${inv.irpfRate}%` : ''}</div>
+        ${inv.desc ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${inv.desc}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <div style="text-align:right;margin-right:8px">
+          <div class="row-amount c-income">${fmt(inv.total)}</div>
+        </div>
+        <button class="btn-icon" onclick="openInvoiceModal('${inv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="btn-danger-icon" onclick="deleteInvoice('${inv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  BUSINESS DASHBOARD BLOCKS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getBizDashBlock(id) {
+  const allTxIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const allTxExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const monthTx = transactions.filter(txInMonth);
+  const monthIncome = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const monthExpense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+  switch (id) {
+    case 'biz-resumen': {
+      const beneficio = allTxIncome - allTxExpense;
+      const margen = allTxIncome > 0 ? Math.round(beneficio / allTxIncome * 100) : 0;
+      const pendingInv = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + i.total, 0);
+      return `<div class="biz-kpi-grid">
+        <div class="biz-kpi"><div class="biz-kpi-label">Ingresos totales</div><div class="biz-kpi-value c-income">${fmt(allTxIncome)}</div><div class="biz-kpi-sub">${monthIncome > 0 ? `Este mes: ${fmt(monthIncome)}` : 'Sin ingresos este mes'}</div></div>
+        <div class="biz-kpi"><div class="biz-kpi-label">Gastos totales</div><div class="biz-kpi-value c-expense">${fmt(allTxExpense)}</div><div class="biz-kpi-sub">${monthExpense > 0 ? `Este mes: ${fmt(monthExpense)}` : 'Sin gastos este mes'}</div></div>
+        <div class="biz-kpi"><div class="biz-kpi-label">Beneficio neto</div><div class="biz-kpi-value ${beneficio >= 0 ? 'c-income' : 'c-expense'}">${fmt(beneficio)}</div><div class="biz-kpi-sub">Margen: ${margen}%</div></div>
+        <div class="biz-kpi"><div class="biz-kpi-label">Facturas pendientes</div><div class="biz-kpi-value">${fmt(pendingInv)}</div><div class="biz-kpi-sub">${invoices.filter(i => i.status === 'pending').length} factura(s) sin cobrar</div></div>
+      </div>`;
+    }
+    case 'biz-iva': {
+      const ivaRep = invoices.reduce((s, i) => s + (i.ivaAmt || 0), 0);
+      const ivaSop = transactions.filter(t => t.type === 'expense' && t.ivaAmt).reduce((s, t) => s + t.ivaAmt, 0);
+      const ivaLiq = ivaRep - ivaSop;
+      return `<div class="card"><div class="card-title">IVA — Liquidación trimestral</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="text-align:center;padding:14px;background:var(--income-bg);border-radius:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--income);margin-bottom:6px">Repercutido</div>
+            <div style="font-size:20px;font-weight:800;color:var(--income)">${fmt(ivaRep)}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Cobrado a clientes</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--expense-bg);border-radius:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1565C0;margin-bottom:6px">Soportado</div>
+            <div style="font-size:20px;font-weight:800;color:#1565C0">${fmt(ivaSop)}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Pagado en gastos</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:${ivaLiq < 0 ? 'var(--income-bg)' : 'var(--expense-bg)'};border-radius:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${ivaLiq < 0 ? 'var(--income)' : 'var(--expense)'};margin-bottom:6px">${ivaLiq < 0 ? 'A recuperar' : 'A ingresar'}</div>
+            <div style="font-size:20px;font-weight:800;color:${ivaLiq < 0 ? 'var(--income)' : 'var(--expense)'}">${fmt(Math.abs(ivaLiq))}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px">Modelo 303</div>
+          </div>
+        </div>
+      </div>`;
+    }
+    case 'biz-irpf': {
+      const baseImponible = allTxIncome - allTxExpense;
+      const irpf15 = Math.max(0, baseImponible * 0.15);
+      const irpf20 = Math.max(0, baseImponible * 0.20);
+      const retenidas = invoices.reduce((s, i) => s + (i.irpfAmt || 0), 0);
+      const aPagar15 = Math.max(0, irpf15 - retenidas);
+      return `<div class="card"><div class="card-title">IRPF estimado — Modelo 130</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
+          <span style="font-size:28px;font-weight:800;color:var(--expense)">${fmt(aPagar15)}</span>
+          <span style="font-size:12px;color:var(--muted)">estimado a pagar (15%)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+          <div style="padding:10px;background:var(--bg);border-radius:10px">
+            <div style="color:var(--muted);margin-bottom:3px">Base imponible</div>
+            <div style="font-weight:700">${fmt(baseImponible)}</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:10px">
+            <div style="color:var(--muted);margin-bottom:3px">Retenciones cobradas</div>
+            <div style="font-weight:700;color:var(--income)">${fmt(retenidas)}</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:10px">
+            <div style="color:var(--muted);margin-bottom:3px">Al 15% (inicio)</div>
+            <div style="font-weight:700;color:var(--expense)">${fmt(aPagar15)}</div>
+          </div>
+          <div style="padding:10px;background:var(--bg);border-radius:10px">
+            <div style="color:var(--muted);margin-bottom:3px">Al 20% (régimen gral)</div>
+            <div style="font-weight:700;color:var(--expense)">${fmt(Math.max(0, irpf20 - retenidas))}</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:10px">* Estimación orientativa. Consulta con tu asesor fiscal.</div>
+      </div>`;
+    }
+    case 'biz-gastos-cat': {
+      const ebc = {};
+      transactions.filter(t => t.type === 'expense').forEach(t => { ebc[t.category] = (ebc[t.category] || 0) + t.amount; });
+      const sorted = Object.entries(ebc).sort((a, b) => b[1] - a[1]);
+      const totalExp = sorted.reduce((s, [, v]) => s + v, 0);
+      const max = sorted[0]?.[1] || 1;
+      return `<div class="card"><div class="card-title">Gastos por categoría</div>
+        ${sorted.length ? sorted.slice(0, 6).map(([cid, amt]) => {
+          const c = getCat('expense', cid);
+          return `<div class="list-row">
+            <div class="row-left"><div class="row-icon">${c.emoji}</div>
+              <div><div class="row-name">${c.name}</div>
+                <div class="progress-bar" style="width:80px"><div class="progress-fill c-expense" style="width:${Math.round(amt/max*100)}%"></div></div>
+              </div>
+            </div>
+            <div class="row-right"><div class="row-amount c-expense">${fmt(amt)}</div><div class="row-pct">${totalExp ? Math.round(amt/totalExp*100) : 0}%</div></div>
+          </div>`;
+        }).join('') : '<div class="empty-state" style="padding:16px 0"><p>Sin gastos registrados</p></div>'}
+      </div>`;
+    }
+    case 'biz-facturas': {
+      const recent = [...invoices].reverse().slice(0, 5);
+      const totalPend = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + i.total, 0);
+      return `<div class="card"><div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Últimas facturas</span>
+        <button class="btn btn-ghost" onclick="goTo('invoices')" style="padding:4px 10px;font-size:11px">Ver todas</button>
+      </div>
+        ${totalPend > 0 ? `<div style="background:var(--income-bg);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px">
+          💰 <strong>${fmt(totalPend)}</strong> pendientes de cobro</div>` : ''}
+        ${recent.length ? recent.map(inv => `
+          <div class="list-row">
+            <div class="row-left"><div class="row-icon">📋</div>
+              <div><div class="row-name">${inv.client}</div>
+              <div class="row-meta">${inv.num || ''} · ${inv.date}</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="row-amount c-income">${fmt(inv.total)}</span>
+              <span class="bill-due ${inv.status === 'paid' ? 'bill-due-paid' : 'bill-due-urgent'}">${inv.status === 'paid' ? '✓ Cobrada' : 'Pendiente'}</span>
+            </div>
+          </div>`).join('')
+        : '<div class="empty-state" style="padding:16px 0"><p>Sin facturas aún</p></div>'}
+      </div>`;
+    }
+    case 'biz-subs': {
+      const activeSubs = subscriptions.filter(s => s.active !== false);
+      const monthlyTotal = activeSubs.reduce((s, sub) => {
+        const amt = sub.amount || 0;
+        return s + (sub.cycle === 'yearly' ? amt / 12 : sub.cycle === 'weekly' ? amt * 4.33 : amt);
+      }, 0);
+      return `<div class="card"><div class="card-title">Suscripciones activas (gastos fijos)</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
+          <span style="font-size:24px;font-weight:800;color:var(--expense)">${fmt(monthlyTotal)}</span>
+          <span style="font-size:12px;color:var(--muted)">/mes</span>
+        </div>
+        ${activeSubs.slice(0, 5).map(sub => `
+          <div class="list-row">
+            <div class="row-left"><div class="row-icon">${sub.emoji || '📦'}</div>
+              <div><div class="row-name">${sub.name}</div>
+              <div class="row-meta">${sub.cycle === 'yearly' ? 'Anual' : sub.cycle === 'weekly' ? 'Semanal' : 'Mensual'}</div></div>
+            </div>
+            <span class="row-amount c-expense">${fmt(sub.amount)}</span>
+          </div>`).join('')}
+        ${activeSubs.length > 5 ? `<div style="font-size:11px;color:var(--muted);padding-top:8px">+${activeSubs.length-5} más</div>` : ''}
+        ${!activeSubs.length ? '<div class="empty-state" style="padding:16px 0"><p>Sin suscripciones activas</p></div>' : ''}
+      </div>`;
+    }
+    default: return getDashBlock(id);
+  }
+}
 </script>
 </body>
 </html>
