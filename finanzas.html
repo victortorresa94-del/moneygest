@@ -867,6 +867,34 @@ input[type="date"]{cursor:pointer}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── MIGRACIÓN: mover datos de claves antiguas (fnz_tx) a nuevas (fnz_personal_tx) ──
+(function migrateOldKeys() {
+  const alreadyMigrated = localStorage.getItem('fnz_migrated_v2');
+  if (alreadyMigrated) return;
+  const oldToNew = {
+    'fnz_tx':      'fnz_personal_tx',
+    'fnz_exp':     'fnz_personal_exp',
+    'fnz_sub':     'fnz_personal_sub',
+    'fnz_cats':    'fnz_personal_cats',
+    'fnz_bills':   'fnz_personal_bills',
+    'fnz_savings': 'fnz_personal_savings',
+    'fnz_dash':    'fnz_personal_dash',
+  };
+  let migrated = 0;
+  for (const [oldKey, newKey] of Object.entries(oldToNew)) {
+    const val = localStorage.getItem(oldKey);
+    if (val !== null) {
+      // Solo migrar si la nueva clave no tiene datos propios ya
+      if (!localStorage.getItem(newKey)) {
+        localStorage.setItem(newKey, val);
+      }
+      migrated++;
+    }
+  }
+  localStorage.setItem('fnz_migrated_v2', '1');
+  if (migrated > 0) console.log(`[MoneyGest] Migrados ${migrated} conjuntos de datos a perfil "personal"`);
+})();
+
 function getStoreKeys() {
   const pid = localStorage.getItem('fnz_active_profile') || 'personal';
   return {
