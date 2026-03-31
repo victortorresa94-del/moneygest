@@ -30,8 +30,8 @@ body{font-family:'Inter',Arial,sans-serif;background:var(--bg);color:var(--text)
 /* ── SIDEBAR ── */
 .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0;z-index:50;box-shadow:var(--shadow-sm)}
 .logo{padding:0 20px 32px;font-size:17px;font-weight:800;letter-spacing:-.7px;display:flex;align-items:center;gap:10px}
-.logo-dot{width:28px;height:28px;border-radius:8px;background:var(--text);display:flex;align-items:center;justify-content:center}
-.logo-dot::after{content:'₣';color:#fff;font-size:14px;font-weight:800}
+.logo-dot{width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0}
+.logo-dot img{width:36px;height:36px;object-fit:contain}
 .nav-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--light);padding:0 20px 8px;margin-top:10px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:0 6px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:500;font-size:13px;transition:all .15s;position:relative}
 .nav-item:hover{color:var(--text);background:var(--bg)}
@@ -412,7 +412,7 @@ input[type="date"]{cursor:pointer}
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
-  <div class="logo"><div class="logo-dot"></div><span>Finanzas</span></div>
+  <div class="logo"><div class="logo-dot"><img src="icon.svg" alt="logo"></div><span>MoneyGest</span></div>
   <div class="nav-section">General</div>
   <div class="nav-item active" onclick="goTo('dashboard')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>

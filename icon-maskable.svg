@@ -1,5 +1,79 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#111111"/>
-  <text x="245" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="256" font-weight="700" fill="#ffffff" letter-spacing="-4">F</text>
-  <circle cx="370" cy="175" r="34" fill="#ffffff"/>
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0d1829"/>
+      <stop offset="100%" stop-color="#060c14"/>
+    </radialGradient>
+    <radialGradient id="sphere2" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#ffcc44"/>
+      <stop offset="40%" stop-color="#ff8c00"/>
+      <stop offset="100%" stop-color="#b84000"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff8c00" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ff8c00" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="fglow2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="sglow2" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed background (no border-radius for maskable) -->
+  <rect width="512" height="512" fill="url(#bg2)"/>
+
+  <!-- Ambient glow -->
+  <circle cx="256" cy="256" r="140" fill="url(#glow2)" filter="url(#fglow2)"/>
+
+  <!-- Cage edges -->
+  <line x1="256" y1="68"  x2="136" y2="196" stroke="#3a8fff" stroke-width="2.8" opacity="0.95"/>
+  <line x1="256" y1="68"  x2="376" y2="196" stroke="#3a8fff" stroke-width="2.8" opacity="0.95"/>
+  <line x1="256" y1="444" x2="136" y2="316" stroke="#3a8fff" stroke-width="2.8" opacity="0.95"/>
+  <line x1="256" y1="444" x2="376" y2="316" stroke="#3a8fff" stroke-width="2.8" opacity="0.95"/>
+  <line x1="68"  y1="256" x2="136" y2="196" stroke="#3a8fff" stroke-width="2.4" opacity="0.75"/>
+  <line x1="68"  y1="256" x2="136" y2="316" stroke="#3a8fff" stroke-width="2.4" opacity="0.75"/>
+  <line x1="444" y1="256" x2="376" y2="196" stroke="#3a8fff" stroke-width="2.4" opacity="0.75"/>
+  <line x1="444" y1="256" x2="376" y2="316" stroke="#3a8fff" stroke-width="2.4" opacity="0.75"/>
+  <line x1="136" y1="196" x2="376" y2="196" stroke="#3a8fff" stroke-width="2"   opacity="0.65"/>
+  <line x1="136" y1="316" x2="376" y2="316" stroke="#3a8fff" stroke-width="2"   opacity="0.65"/>
+  <line x1="136" y1="196" x2="136" y2="316" stroke="#3a8fff" stroke-width="2"   opacity="0.65"/>
+  <line x1="376" y1="196" x2="376" y2="316" stroke="#3a8fff" stroke-width="2"   opacity="0.65"/>
+  <line x1="136" y1="196" x2="256" y2="136" stroke="#2266cc" stroke-width="1.6" opacity="0.5"/>
+  <line x1="376" y1="196" x2="256" y2="136" stroke="#2266cc" stroke-width="1.6" opacity="0.5"/>
+  <line x1="136" y1="316" x2="256" y2="376" stroke="#2266cc" stroke-width="1.6" opacity="0.5"/>
+  <line x1="376" y1="316" x2="256" y2="376" stroke="#2266cc" stroke-width="1.6" opacity="0.5"/>
+  <line x1="68"  y1="256" x2="256" y2="136" stroke="#2266cc" stroke-width="1.4" opacity="0.38"/>
+  <line x1="444" y1="256" x2="256" y2="136" stroke="#2266cc" stroke-width="1.4" opacity="0.38"/>
+  <line x1="68"  y1="256" x2="256" y2="376" stroke="#2266cc" stroke-width="1.4" opacity="0.38"/>
+  <line x1="444" y1="256" x2="256" y2="376" stroke="#2266cc" stroke-width="1.4" opacity="0.38"/>
+
+  <circle cx="256" cy="68"  r="6" fill="#66bbff" opacity="0.95"/>
+  <circle cx="256" cy="444" r="6" fill="#66bbff" opacity="0.95"/>
+  <circle cx="68"  cy="256" r="5" fill="#4499ee" opacity="0.8"/>
+  <circle cx="444" cy="256" r="5" fill="#4499ee" opacity="0.8"/>
+  <circle cx="136" cy="196" r="4.5" fill="#3a8fff" opacity="0.85"/>
+  <circle cx="376" cy="196" r="4.5" fill="#3a8fff" opacity="0.85"/>
+  <circle cx="136" cy="316" r="4.5" fill="#3a8fff" opacity="0.85"/>
+  <circle cx="376" cy="316" r="4.5" fill="#3a8fff" opacity="0.85"/>
+
+  <!-- Sphere -->
+  <circle cx="256" cy="256" r="108" fill="url(#sphere2)" filter="url(#sglow2)"/>
+  <line x1="152" y1="220" x2="360" y2="220" stroke="#993300" stroke-width="1.2" opacity="0.4"/>
+  <line x1="152" y1="292" x2="360" y2="292" stroke="#993300" stroke-width="1.2" opacity="0.4"/>
+  <line x1="196" y1="152" x2="196" y2="360" stroke="#993300" stroke-width="1"   opacity="0.3"/>
+  <line x1="316" y1="152" x2="316" y2="360" stroke="#993300" stroke-width="1"   opacity="0.3"/>
+
+  <!-- $ sign -->
+  <text x="258" y="295" font-family="'Arial Black',Impact,Arial" font-weight="900"
+        font-size="152" fill="#7a2000" text-anchor="middle" dominant-baseline="middle" opacity="0.45">$</text>
+  <text x="256" y="292" font-family="'Arial Black',Impact,Arial" font-weight="900"
+        font-size="148" fill="#fff5cc" text-anchor="middle" dominant-baseline="middle"
+        filter="url(#sglow2)">$</text>
+
+  <circle cx="256" cy="256" r="108" fill="none" stroke="#ffcc55" stroke-width="2.2" opacity="0.5"/>
+  <ellipse cx="218" cy="208" rx="32" ry="19" fill="white" opacity="0.13" transform="rotate(-30 218 208)"/>
 </svg>
