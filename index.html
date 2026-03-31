@@ -638,6 +638,7 @@ input[type="date"]{cursor:pointer}
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-ghost" onclick="diagnoseLs()" style="border-color:#856404;color:#856404">🔍 Diagnóstico</button>
         <button class="btn btn-primary" onclick="restoreOriginalData()" style="background:#856404">♻️ Restaurar datos originales</button>
+        <button class="btn" onclick="clearProfileData()" style="background:#FF3B30;color:#fff">🗑️ Limpiar todo el perfil</button>
         <button class="btn btn-ghost" onclick="document.getElementById('recovery-card').style.display='none'" style="font-size:11px">Ocultar</button>
       </div>
     </div>
@@ -869,9 +870,12 @@ input[type="date"]{cursor:pointer}
     <div class="ai-image-preview" id="ai-image-preview"></div>
     <div class="ai-input-bar">
       <textarea id="ai-input" placeholder="Describe tus movimientos..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMessage()}"></textarea>
-      <button class="ai-action-btn" id="ai-mic-btn" onclick="toggleVoiceInput()" title="Micrófono">🎤</button>
-      <label class="ai-action-btn" title="Imagen" style="cursor:pointer">
-        📷<input type="file" id="ai-image-input" accept="image/*" style="display:none" multiple onchange="handleAiImages(this.files)">
+      <button class="ai-action-btn" id="ai-mic-btn" onclick="toggleVoiceInput()" title="Voz">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </button>
+      <label class="ai-action-btn" title="Adjuntar imagen o PDF" style="cursor:pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        <input type="file" id="ai-image-input" accept="image/*,.pdf,application/pdf" style="display:none" multiple onchange="handleAiImages(this.files)">
       </label>
       <button class="ai-send-btn" onclick="sendAiMessage()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
@@ -2142,6 +2146,19 @@ function restoreOriginalData() {
   }
 }
 
+function clearProfileData(skipConfirm) {
+  if (!skipConfirm && !confirm('⚠️ Esto borrará TODOS los datos del perfil activo. ¿Seguro?')) return;
+  const SK = getStoreKeys();
+  // Clear all keys for active profile
+  Object.values(SK).forEach(k => localStorage.removeItem(k));
+  // Also clear old legacy keys (fnz_tx etc.) to avoid future re-migration issues
+  ['fnz_tx','fnz_exp','fnz_sub','fnz_cats','fnz_bills','fnz_savings','fnz_dash'].forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem('fnz_migrated_v2');
+  loadAllData();
+  renderDashboard();
+  showToast('Perfil limpiado ✓');
+}
+
 function showDataMsg(text, type){
   const el = document.getElementById('data-msg');
   el.innerHTML = `<div style="padding:12px 16px;border-radius:var(--radius-sm);background:var(--${type}-bg);color:var(--${type});font-size:13px;font-weight:500">${text}</div>`;
@@ -2310,11 +2327,11 @@ function handleAiImages(files) {
 
 function renderAiImagePreviews() {
   const container = document.getElementById('ai-image-preview');
-  container.innerHTML = aiImages.map((img, i) => `
-    <div class="ai-img-thumb">
-      <img src="${img.dataUrl}" alt="imagen">
-      <button class="ai-img-remove" onclick="removeAiImage(${i})">&times;</button>
-    </div>`).join('');
+  container.innerHTML = aiImages.map((img, i) => {
+    const isPdf = img.type === 'application/pdf' || img.file.name.endsWith('.pdf');
+    if(isPdf) return `<div class="ai-file-chip">📄 ${img.file.name}<button class="ai-img-remove" style="position:static;width:14px;height:14px;margin-left:4px" onclick="removeAiImage(${i})">&times;</button></div>`;
+    return `<div class="ai-img-thumb"><img src="${img.dataUrl}" alt="imagen"><button class="ai-img-remove" onclick="removeAiImage(${i})">&times;</button></div>`;
+  }).join('');
 }
 
 function removeAiImage(i) {
@@ -2355,7 +2372,23 @@ async function sendAiMessage() {
 
     const systemPrompt = hasImages
       ? `Eres un asistente que analiza capturas de pantalla de extractos bancarios y apps financieras. Extrae TODAS las transacciones visibles y devuelve SOLO un JSON válido sin markdown:\n{"actions":[{"type":"add_expense","amount":45.99,"description":"Mercadona","category":"alimentación"},{"type":"add_income","amount":2500,"description":"Nómina","category":"trabajo"}],"summary":"He encontrado X transacciones en el extracto."}\nPara cargos/débitos usa add_expense. Para abonos/créditos usa add_income. Devuelve SOLO el JSON.`
-      : `Eres el asistente de MoneyGest, app de finanzas personales. El usuario describe transacciones en español. Extrae la información y devuelve SOLO un JSON válido sin markdown:\n{"actions":[{"type":"add_expense","amount":200,"description":"Compras Zara","category":"ropa"},{"type":"add_income","amount":883,"description":"Factura cliente","category":"trabajo"},{"type":"add_saving","name":"Bitcoin","amount":50,"fromIncome":true},{"type":"mark_bill_paid","name":"Netflix"},{"type":"add_bill","name":"Alquiler","amount":800,"emoji":"🏠"}],"summary":"Resumen de lo procesado..."}\nTipos: add_expense, add_income, add_saving, mark_bill_paid, add_bill. Devuelve SOLO el JSON sin texto adicional.`;
+      : `Eres el asistente de MoneyGest, app de finanzas personales. El usuario habla en español. Extrae la intención y devuelve SOLO un JSON válido sin markdown.
+
+PERFILES: "empresa"/"negocio"/"Aether Labs" → switch_profile name:"business". "personal"/"casa" → switch_profile name:"personal".
+
+ACCIONES DISPONIBLES:
+- add_expense: {"type":"add_expense","amount":200,"description":"Zara","category":"ropa"}
+- add_income: {"type":"add_income","amount":883,"description":"Factura cliente","category":"trabajo"}
+- add_saving: {"type":"add_saving","name":"Bitcoin","amount":50,"fromIncome":true}
+- mark_bill_paid: {"type":"mark_bill_paid","name":"Netflix"}
+- add_bill: {"type":"add_bill","name":"Alquiler","amount":800,"emoji":"🏠"}
+- clear_profile_data: {"type":"clear_profile_data"} — cuando pide borrar/limpiar/vaciar todos los datos del perfil activo
+- switch_profile: {"type":"switch_profile","name":"personal"} — cambia entre perfiles (personal/empresa)
+
+Ejemplo JSON:
+{"actions":[{"type":"add_expense","amount":200,"description":"Compras","category":"alimentación"}],"summary":"He registrado un gasto de 200€."}
+
+Devuelve SOLO el JSON, sin texto adicional.`;
 
     let messages;
     if(hasImages) {
@@ -2428,6 +2461,17 @@ async function sendAiMessage() {
         bills.push({id:uid(), name:action.name||'Pago', emoji:action.emoji||'💳', amount:parseFloat(action.amount)||0, dueDate:'', note:'', status:'pending'});
         save(SK.bills, bills);
         executedCount++;
+      } else if(action.type === 'clear_profile_data') {
+        clearProfileData(true); // skip confirm, AI already confirmed intent
+        executedCount++;
+      } else if(action.type === 'switch_profile') {
+        const targetName = (action.name||'').toLowerCase();
+        const profiles = getProfiles();
+        const target = profiles.find(p =>
+          p.name.toLowerCase().includes(targetName) ||
+          p.type === (targetName.includes('empresa')||targetName.includes('negocio')||targetName.includes('aether') ? 'business' : 'personal')
+        );
+        if(target){ switchProfile(target.id); executedCount++; }
       }
     });
 
