@@ -318,7 +318,7 @@ input[type="date"]{cursor:pointer}
 }
 .ai-input-bar textarea {
   flex: 1; border: 1.5px solid var(--border); border-radius: 12px;
-  padding: 9px 12px; font-size: 14px; resize: none; min-height: 40px;
+  padding: 9px 12px; font-size: 16px; resize: none; min-height: 40px;
   max-height: 110px; font-family: 'Inter', Arial, sans-serif;
   background: var(--bg); color: var(--text); line-height: 1.4;
 }
@@ -389,6 +389,8 @@ input[type="date"]{cursor:pointer}
 }
 @media(max-width:700px) {
   .ai-fab { bottom: calc(80px + env(safe-area-inset-bottom)); right: 16px; }
+  .ai-panel { height: 75vh; max-height: calc(100dvh - 60px); }
+  .ai-messages { -webkit-overflow-scrolling: touch; }
 }
 
 /* ── BUSINESS DASHBOARD ── */
@@ -410,6 +412,43 @@ input[type="date"]{cursor:pointer}
 @media(max-width:400px) {
   .biz-kpi-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ── HOME PAGE ── */
+.home-header{margin-bottom:20px}
+.home-title{font-size:28px;font-weight:800;letter-spacing:-1px}
+.home-period{font-size:13px;color:var(--muted);margin-top:2px}
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.home-action-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:20px 16px;border-radius:var(--radius);border:none;font-family:'Inter',Arial,sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s;letter-spacing:-.3px;-webkit-tap-highlight-color:transparent}
+.home-action-btn.expense{background:var(--expense-bg);color:var(--expense);box-shadow:0 2px 12px rgba(255,59,48,.12)}
+.home-action-btn.income{background:var(--income-bg);color:var(--income);box-shadow:0 2px 12px rgba(0,168,107,.12)}
+.home-action-btn:active{transform:scale(.96)}
+.home-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.home-stat-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow .15s}
+.home-stat-card:hover{box-shadow:var(--shadow)}
+.home-stat-card.full{grid-column:1/-1}
+.home-stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px}
+.home-stat-value{font-size:26px;font-weight:800;letter-spacing:-1.2px;line-height:1}
+.home-stat-value.patrimonio{font-size:34px}
+.home-stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+/* Bottom nav labels */
+.bn-item{flex-direction:column;gap:1px}
+.bn-label{font-size:9px;font-weight:700;letter-spacing:.1px;color:inherit}
+/* Profile tag on rows */
+.profile-tag{display:inline-flex;align-items:center;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle}
+.profile-tag.personal{background:#E3F2FD;color:#1565C0}
+.profile-tag.business{background:#FFF8E1;color:#B45309}
+/* Gastos / Ingresos section cards */
+.section-card{background:var(--surface);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+.section-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:8px;flex-wrap:wrap}
+.section-card-title{font-size:14px;font-weight:700;letter-spacing:-.2px}
+.section-card-total{font-size:15px;font-weight:800;letter-spacing:-.5px}
+@media(max-width:700px){
+  .home-stat-value{font-size:22px}
+  .home-stat-value.patrimonio{font-size:28px}
+  .home-stat-card{padding:16px}
+  .home-action-btn{font-size:15px;padding:18px 12px}
+  .bn-item{padding:6px 10px;min-height:50px}
+}
 </style>
 </head>
 <body>
@@ -417,61 +456,57 @@ input[type="date"]{cursor:pointer}
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="logo"><div class="logo-dot"><img src="icon.svg" alt="logo"></div><span>MoneyGest</span></div>
-  <div class="nav-section">General</div>
-  <div class="nav-item active" onclick="goTo('dashboard')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Dashboard</span>
+  <div class="nav-section">Principal</div>
+  <div class="nav-item active" onclick="goTo('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Home</span>
   </div>
-  <div class="nav-section">Dinero</div>
-  <div class="nav-item" onclick="goTo('transactions')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
-    <span>Movimientos</span>
+  <div class="nav-item" onclick="goTo('gastos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    <span>Gastos</span>
   </div>
-  <div class="nav-item" onclick="goTo('expected')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    <span>Ingresos Esperados</span>
+  <div class="nav-item" onclick="goTo('ingresos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    <span>Ingresos</span>
   </div>
-  <div class="nav-item" onclick="goTo('subscriptions')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
-    <span>Suscripciones</span>
-  </div>
-  <div class="nav-item" onclick="goTo('invoices')" id="nav-invoices" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-    <span>Facturas</span>
-  </div>
+  <div class="nav-section">Más</div>
   <div class="nav-item" onclick="goTo('savings')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
     <span>Ahorro</span>
   </div>
-  <div class="nav-section">Config</div>
   <div class="nav-item" onclick="goTo('categories')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
     <span>Categorías</span>
+  </div>
+  <div class="nav-item" onclick="goTo('invoices')" id="nav-invoices">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>Facturas</span>
   </div>
   <div class="nav-item" onclick="goTo('data')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     <span>Datos</span>
   </div>
-  <div class="sidebar-footer">v1.0</div>
+  <div class="sidebar-footer">v2.0</div>
 </nav>
 
 <!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav" id="bottom-nav">
-  <div class="bn-item active" onclick="goTo('dashboard')" data-page="dashboard">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  <div class="bn-item active" onclick="goTo('home')" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="bn-label">Home</span>
   </div>
-  <div class="bn-item" onclick="goTo('transactions')" data-page="transactions">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
-  </div>
-  <div class="bn-item" onclick="goTo('bills')" data-page="bills">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+  <div class="bn-item" onclick="goTo('gastos')" data-page="gastos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    <span class="bn-label">Gastos</span>
     <span id="bills-badge" class="bn-badge" style="display:none"></span>
   </div>
-  <div class="bn-item" onclick="goTo('subscriptions')" data-page="subscriptions">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
+  <div class="bn-item" onclick="goTo('ingresos')" data-page="ingresos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    <span class="bn-label">Ingresos</span>
   </div>
   <div class="bn-item" onclick="openMore()" id="bn-more">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+    <span class="bn-label">Más</span>
   </div>
 </nav>
 
@@ -486,27 +521,61 @@ input[type="date"]{cursor:pointer}
 <!-- MAIN -->
 <main class="main">
 
-  <!-- ── DASHBOARD ── -->
-  <div id="page-dashboard" class="page active">
-    <div class="page-header" style="margin-bottom:16px">
+  <!-- ── HOME ── -->
+  <div id="page-home" class="page active">
+    <div class="home-header">
+      <div class="home-title" id="home-greeting">Hola 👋</div>
+      <div class="home-period" id="home-period"></div>
+    </div>
+    <div class="home-actions">
+      <button class="home-action-btn expense" onclick="openTxModal(null,'expense')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        + Gasto
+      </button>
+      <button class="home-action-btn income" onclick="openTxModal(null,'income')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        + Ingreso
+      </button>
+    </div>
+    <div class="home-stats" id="home-stats"></div>
+  </div>
+
+  <!-- ── GASTOS ── -->
+  <div id="page-gastos" class="page">
+    <div class="page-header">
       <div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <div class="page-title">Dashboard</div>
-          <span class="profile-badge" id="profile-badge" onclick="openMore()">👤 Personal</span>
-        </div>
-        <div class="page-sub" id="dash-period"></div>
+        <div class="page-title">Gastos</div>
+        <div class="page-sub" id="gastos-sub"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="month-nav">
-          <button class="month-btn" onclick="changeMonth(-1)">&#8249;</button>
-          <span id="month-label"></span>
-          <button class="month-btn" onclick="changeMonth(1)">&#8250;</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="filter-bar" id="gastos-profile-filter">
+          <div class="chip active" onclick="setGastosFilter('all',this)">Todos</div>
+          <div class="chip" onclick="setGastosFilter('personal',this)">Personal</div>
+          <div class="chip" onclick="setGastosFilter('business',this)">Empresa</div>
         </div>
-        <button class="btn btn-ghost" id="dash-edit-btn" onclick="toggleDashEdit()" style="padding:7px 12px;font-size:12px">Editar</button>
+        <button class="btn btn-primary" onclick="openTxModal(null,'expense')">+ Gasto</button>
       </div>
     </div>
-    <div id="dash-editing-bar"></div>
-    <div id="dash-blocks"></div>
+    <div id="gastos-content"></div>
+  </div>
+
+  <!-- ── INGRESOS ── -->
+  <div id="page-ingresos" class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Ingresos</div>
+        <div class="page-sub" id="ingresos-sub"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="filter-bar" id="ingresos-profile-filter">
+          <div class="chip active" onclick="setIngresosFilter('all',this)">Todos</div>
+          <div class="chip" onclick="setIngresosFilter('personal',this)">Personal</div>
+          <div class="chip" onclick="setIngresosFilter('business',this)">Empresa</div>
+        </div>
+        <button class="btn btn-primary" onclick="openTxModal(null,'income')">+ Ingreso</button>
+      </div>
+    </div>
+    <div id="ingresos-content"></div>
   </div>
 
   <!-- ── TRANSACTIONS ── -->
@@ -574,6 +643,10 @@ input[type="date"]{cursor:pointer}
   <div id="page-categories" class="page">
     <div class="page-header">
       <div><div class="page-title">Categorías</div><div class="page-sub">Personaliza tus tipos de ingreso y gasto</div></div>
+    </div>
+    <div class="type-toggle" style="max-width:360px;margin-bottom:20px">
+      <div class="toggle-opt active" id="cat-tab-personal" onclick="setCatTab('personal')">👤 Personal</div>
+      <div class="toggle-opt" id="cat-tab-business" onclick="setCatTab('business')">🏢 Empresa</div>
     </div>
     <div class="cats-grid">
       <div class="card">
@@ -705,6 +778,10 @@ input[type="date"]{cursor:pointer}
     <div class="type-toggle">
       <div class="toggle-opt active income" id="tog-income" onclick="setTxType('income')">Ingreso</div>
       <div class="toggle-opt expense" id="tog-expense" onclick="setTxType('expense')">Gasto</div>
+    </div>
+    <div class="type-toggle" style="margin-bottom:16px">
+      <div class="toggle-opt active" id="tog-personal" onclick="setTxProfile('personal')">👤 Personal</div>
+      <div class="toggle-opt" id="tog-business" onclick="setTxProfile('business')">🏢 Empresa</div>
     </div>
     <div class="form-grid">
       <div class="form-group full"><label>Descripción</label><input type="text" id="tx-desc" placeholder="Ej. Factura cliente, Supermercado..."></div>
@@ -976,44 +1053,53 @@ input[type="date"]{cursor:pointer}
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// ── MIGRACIÓN: mover datos de claves antiguas (fnz_tx) a nuevas (fnz_personal_tx) ──
-(function migrateOldKeys() {
-  const alreadyMigrated = localStorage.getItem('fnz_migrated_v2');
-  if (alreadyMigrated) return;
-  const oldToNew = {
-    'fnz_tx':      'fnz_personal_tx',
-    'fnz_exp':     'fnz_personal_exp',
-    'fnz_sub':     'fnz_personal_sub',
-    'fnz_cats':    'fnz_personal_cats',
-    'fnz_bills':   'fnz_personal_bills',
-    'fnz_savings': 'fnz_personal_savings',
-    'fnz_dash':    'fnz_personal_dash',
-  };
-  let migrated = 0;
-  for (const [oldKey, newKey] of Object.entries(oldToNew)) {
-    const val = localStorage.getItem(oldKey);
-    if (val !== null) {
-      // Solo migrar si la nueva clave no tiene datos propios ya
-      if (!localStorage.getItem(newKey)) {
-        localStorage.setItem(newKey, val);
-      }
-      migrated++;
-    }
-  }
-  localStorage.setItem('fnz_migrated_v2', '1');
-  if (migrated > 0) console.log(`[MoneyGest] Migrados ${migrated} conjuntos de datos a perfil "personal"`);
+// ── MIGRACIÓN v1→v2: claves antiguas → fnz_personal_* ──
+(function migrateV1() {
+  if (localStorage.getItem('fnz_migrated_v2')) return;
+  const oldToNew = {'fnz_tx':'fnz_personal_tx','fnz_exp':'fnz_personal_exp','fnz_sub':'fnz_personal_sub','fnz_cats':'fnz_personal_cats','fnz_bills':'fnz_personal_bills','fnz_savings':'fnz_personal_savings'};
+  for (const [o,n] of Object.entries(oldToNew)) { const v=localStorage.getItem(o); if(v&&!localStorage.getItem(n)) localStorage.setItem(n,v); }
+  localStorage.setItem('fnz_migrated_v2','1');
 })();
 
-function getStoreKeys() {
-  const pid = localStorage.getItem('fnz_active_profile') || 'personal';
-  return {
-    tx: `fnz_${pid}_tx`, exp: `fnz_${pid}_exp`, sub: `fnz_${pid}_sub`,
-    cats: `fnz_${pid}_cats`, bills: `fnz_${pid}_bills`,
-    savings: `fnz_${pid}_savings`, dash: `fnz_${pid}_dash`,
-    invoices: `fnz_${pid}_invoices`
-  };
-}
-let STORE_KEYS = getStoreKeys();
+// ── MIGRACIÓN v2→v3: perfiles separados → store unificado con campo profile ──
+(function migrateV3() {
+  if (localStorage.getItem('fnz_migrated_v3')) return;
+  const types = ['tx','exp','sub','bills'];
+  types.forEach(type => {
+    if (localStorage.getItem('fnz_'+type)) return; // ya existe unificado
+    const personal = JSON.parse(localStorage.getItem('fnz_personal_'+type)||'[]');
+    const business = JSON.parse(localStorage.getItem('fnz_business_'+type)||'[]');
+    const merged = [
+      ...personal.map(i=>({...i, profile: i.profile||'personal'})),
+      ...business.map(i=>({...i, profile: i.profile||'business'}))
+    ];
+    if (merged.length) localStorage.setItem('fnz_'+type, JSON.stringify(merged));
+  });
+  // Savings
+  if (!localStorage.getItem('fnz_savings')) {
+    const ps = JSON.parse(localStorage.getItem('fnz_personal_savings')||'[]');
+    const bs = JSON.parse(localStorage.getItem('fnz_business_savings')||'[]');
+    const ms = [...ps.map(s=>({...s,profile:s.profile||'personal'})),...bs.map(s=>({...s,profile:s.profile||'business'}))];
+    if (ms.length) localStorage.setItem('fnz_savings', JSON.stringify(ms));
+  }
+  // Categories
+  if (!localStorage.getItem('fnz_cats_personal')) {
+    const pc = localStorage.getItem('fnz_personal_cats');
+    if (pc) localStorage.setItem('fnz_cats_personal', pc);
+  }
+  if (!localStorage.getItem('fnz_cats_business')) {
+    const bc = localStorage.getItem('fnz_business_cats');
+    if (bc) localStorage.setItem('fnz_cats_business', bc);
+  }
+  localStorage.setItem('fnz_migrated_v3','1');
+  console.log('[MoneyGest] Migración v3 completada');
+})();
+
+const STORE_KEYS = {
+  tx: 'fnz_tx', exp: 'fnz_exp', sub: 'fnz_sub',
+  bills: 'fnz_bills', savings: 'fnz_savings', invoices: 'fnz_invoices',
+  cats_personal: 'fnz_cats_personal', cats_business: 'fnz_cats_business'
+};
 
 const DEFAULT_BIZ_CATS = {
   income: [
@@ -1061,14 +1147,13 @@ function save(key,val){localStorage.setItem(key,JSON.stringify(val))}
 let transactions = load(STORE_KEYS.tx,[]);
 let expectedIncome = load(STORE_KEYS.exp,[]);
 let subscriptions = load(STORE_KEYS.sub,[]);
-let categories = load(STORE_KEYS.cats, DEFAULT_CATS);
+let categoriesPersonal = load(STORE_KEYS.cats_personal, DEFAULT_CATS);
+let categoriesBusiness = load(STORE_KEYS.cats_business, DEFAULT_BIZ_CATS);
 let bills = load(STORE_KEYS.bills,[]);
 let savings = load(STORE_KEYS.savings,[]);
-let invoices = [];
-const DEFAULT_DASH = {order:['patrimonio','stats','pending-bills','top-cats','upcoming','recent'],hidden:[]};
-let dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
-// Ensure all default blocks exist (migration safety)
-DEFAULT_DASH.order.forEach(b=>{ if(!dashConfig.order.includes(b)&&!dashConfig.hidden.includes(b)) dashConfig.order.push(b); });
+let invoices = load(STORE_KEYS.invoices,[]);
+
+function getCatsForProfile(profile){ return profile==='business' ? categoriesBusiness : categoriesPersonal; }
 
 // Demo data if empty
 if(!transactions.length){
@@ -1076,14 +1161,14 @@ if(!transactions.length){
   const y = now.getFullYear(), m = now.getMonth();
   const fmt = (d)=>d.toISOString().slice(0,10);
   transactions = [
-    {id:uid(),type:'income',amount:2400,description:'Proyecto web cliente A',category:'i1',date:fmt(new Date(y,m,3)),note:''},
-    {id:uid(),type:'income',amount:800,description:'Consultoría SEO',category:'i2',date:fmt(new Date(y,m,8)),note:''},
-    {id:uid(),type:'income',amount:1200,description:'Mantenimiento mensual',category:'i1',date:fmt(new Date(y,m,10)),note:''},
-    {id:uid(),type:'expense',amount:59,description:'Adobe Creative Cloud',category:'e7',date:fmt(new Date(y,m,1)),note:''},
-    {id:uid(),type:'expense',amount:180,description:'Coworking',category:'e3',date:fmt(new Date(y,m,2)),note:''},
-    {id:uid(),type:'expense',amount:320,description:'Google Ads',category:'e6',date:fmt(new Date(y,m,5)),note:''},
-    {id:uid(),type:'expense',amount:45,description:'Gasolina',category:'e2',date:fmt(new Date(y,m,7)),note:''},
-    {id:uid(),type:'expense',amount:90,description:'Comida de trabajo',category:'e1',date:fmt(new Date(y,m,9)),note:''},
+    {id:uid(),type:'income',amount:2400,description:'Proyecto web cliente A',category:'i1',date:fmt(new Date(y,m,3)),note:'',profile:'business'},
+    {id:uid(),type:'income',amount:800,description:'Consultoría SEO',category:'i2',date:fmt(new Date(y,m,8)),note:'',profile:'business'},
+    {id:uid(),type:'income',amount:1200,description:'Nómina mensual',category:'i1',date:fmt(new Date(y,m,10)),note:'',profile:'personal'},
+    {id:uid(),type:'expense',amount:59,description:'Adobe Creative Cloud',category:'be1',date:fmt(new Date(y,m,1)),note:'',profile:'business'},
+    {id:uid(),type:'expense',amount:180,description:'Coworking',category:'be8',date:fmt(new Date(y,m,2)),note:'',profile:'business'},
+    {id:uid(),type:'expense',amount:320,description:'Google Ads',category:'be2',date:fmt(new Date(y,m,5)),note:'',profile:'business'},
+    {id:uid(),type:'expense',amount:45,description:'Gasolina',category:'e2',date:fmt(new Date(y,m,7)),note:'',profile:'personal'},
+    {id:uid(),type:'expense',amount:90,description:'Supermercado',category:'e1',date:fmt(new Date(y,m,9)),note:'',profile:'personal'},
   ];
   save(STORE_KEYS.tx, transactions);
 }
@@ -1143,7 +1228,11 @@ function fmtDate(str){
   return d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
 function today(){return new Date().toISOString().slice(0,10)}
-function getCat(type,id){return (categories[type]||[]).find(c=>c.id===id)||{name:'Sin categoría',emoji:'•'}}
+function getCat(type,id){
+  return (categoriesPersonal[type]||[]).find(c=>c.id===id)
+      || (categoriesBusiness[type]||[]).find(c=>c.id===id)
+      || {name:'Sin categoría',emoji:'•'};
+}
 function daysUntil(day){
   const now = new Date();
   let next = new Date(now.getFullYear(),now.getMonth(),day);
@@ -1157,27 +1246,31 @@ function monthLabel(y,m){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  NAVIGATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let currentPage = 'dashboard';
-const MORE_PAGES = ['expected','categories','data','savings','invoices'];
+let currentPage = 'home';
+const MORE_PAGES = ['transactions','expected','subscriptions','bills','categories','data','savings','invoices'];
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
+  const pageEl = document.getElementById('page-'+page);
+  if(!pageEl) return;
+  pageEl.classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{
     if(n.getAttribute('onclick')===`goTo('${page}')`) n.classList.add('active');
   });
-  // Bottom nav active state
   document.querySelectorAll('.bn-item').forEach(n=>n.classList.remove('active'));
   const bnMatch = document.querySelector(`.bn-item[data-page="${page}"]`);
   if(bnMatch) bnMatch.classList.add('active');
   else if(MORE_PAGES.includes(page)) document.getElementById('bn-more').classList.add('active');
   currentPage = page;
+  closeMore();
   renderPage(page);
 }
 function openMore(){renderMoreDrawer();document.getElementById('more-overlay').classList.add('open')}
 function closeMore(){document.getElementById('more-overlay').classList.remove('open')}
 function renderPage(p){
-  if(p==='dashboard') renderDashboard();
+  if(p==='home') renderHome();
+  else if(p==='gastos') renderGastos();
+  else if(p==='ingresos') renderIngresos();
   else if(p==='transactions') renderTransactions();
   else if(p==='expected') renderExpected();
   else if(p==='subscriptions') renderSubscriptions();
@@ -1189,217 +1282,224 @@ function renderPage(p){
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  MONTH NAVIGATION
+//  HOME
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let viewYear = new Date().getFullYear();
-let viewMonth = new Date().getMonth();
-
-function changeMonth(dir){
-  viewMonth += dir;
-  if(viewMonth > 11){viewMonth=0;viewYear++;}
-  if(viewMonth < 0){viewMonth=11;viewYear--;}
-  renderDashboard();
-}
-
-function txInMonth(tx){
+function txInMonth(tx, y, m){
   const d = new Date(tx.date+'T12:00:00');
-  return d.getFullYear()===viewYear && d.getMonth()===viewMonth;
+  return d.getFullYear()===y && d.getMonth()===m;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DASHBOARD — bloque editable
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const DASH_BLOCK_DEFS = [
-  {id:'patrimonio',  label:'Patrimonio'},
-  {id:'stats',       label:'Resumen mensual'},
-  {id:'pending-bills',label:'Pagos pendientes del mes'},
-  {id:'top-cats',    label:'Top categorías'},
-  {id:'upcoming',    label:'Próximas suscripciones'},
-  {id:'recent',      label:'Últimos movimientos'},
-];
-let dashEditing = false;
+function renderHome(){
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const h = now.getHours();
+  const greeting = h < 13 ? 'Buenos días 👋' : h < 20 ? 'Buenas tardes 👋' : 'Buenas noches 👋';
+  document.getElementById('home-greeting').textContent = greeting;
+  document.getElementById('home-period').textContent = monthLabel(y, m);
 
-function toggleDashEdit(){
-  dashEditing = !dashEditing;
-  document.getElementById('dash-edit-btn').textContent = dashEditing ? 'Listo ✓' : 'Editar';
-  renderDashboard();
-}
-function moveDashBlock(idx, dir){
-  const o=dashConfig.order; [o[idx],o[idx+dir]]=[o[idx+dir],o[idx]];
-  save(STORE_KEYS.dash, dashConfig); renderDashboard();
-}
-function hideDashBlock(id){
-  dashConfig.order=dashConfig.order.filter(b=>b!==id);
-  if(!dashConfig.hidden.includes(id)) dashConfig.hidden.push(id);
-  save(STORE_KEYS.dash, dashConfig); renderDashboard();
-}
-function showDashBlock(id){
-  dashConfig.hidden=dashConfig.hidden.filter(b=>b!==id);
-  dashConfig.order.push(id);
-  save(STORE_KEYS.dash, dashConfig); renderDashboard();
-}
-
-function renderDashboard(){
-  document.getElementById('month-label').textContent = monthLabel(viewYear,viewMonth);
-  document.getElementById('dash-period').textContent = monthLabel(viewYear,viewMonth);
-
-  // Use business default blocks if business profile and using default config
-  const profileType = getActiveProfileType();
-  const BIZ_DEFAULT_ORDER = ['biz-resumen', 'biz-iva', 'biz-irpf', 'biz-facturas', 'biz-gastos-cat', 'biz-subs'];
-  if (profileType === 'business' && dashConfig.order.every(b => !b.startsWith('biz-'))) {
-    dashConfig = { order: BIZ_DEFAULT_ORDER, hidden: [] };
-  }
-
-  // Edit bar
-  const editBar = document.getElementById('dash-editing-bar');
-  if(dashEditing){
-    const hid = dashConfig.hidden;
-    editBar.innerHTML = `<div class="dash-editing-banner">
-      <span>Modo edición — reordena y oculta bloques</span>
-      ${hid.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${hid.map(id=>{
-        const def=DASH_BLOCK_DEFS.find(d=>d.id===id);
-        return `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="showDashBlock('${id}')">+ ${def?.label||id}</button>`;
-      }).join('')}</div>` : '<span style="font-size:12px;color:var(--income)">Todos los bloques visibles</span>'}
-    </div>`;
-  } else { editBar.innerHTML=''; }
-
-  // Render ordered blocks
-  document.getElementById('dash-blocks').innerHTML = dashConfig.order.map((blockId,idx)=>{
-    const ctrl = dashEditing ? `<div class="dash-block-controls">
-      ${idx>0?`<button class="btn-icon" onclick="moveDashBlock(${idx},-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg></button>`:''}
-      ${idx<dashConfig.order.length-1?`<button class="btn-icon" onclick="moveDashBlock(${idx},1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>`:''}
-      <button class="btn-danger-icon" onclick="hideDashBlock('${blockId}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>` : '';
-    return `<div class="dash-block" data-block="${blockId}">${ctrl}${blockId.startsWith('biz-') ? getBizDashBlock(blockId) : getDashBlock(blockId)}</div>`;
-  }).join('');
-}
-
-function getDashBlock(id){
-  const monthTx = transactions.filter(txInMonth);
-  const totalIncome = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const totalExpense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  // Patrimonio real-time
-  // savingsExternal = ahorros que NO vienen de transacciones (dinero externo/previo)
-  // savingsFromIncome = ahorros ya contabilizados como ingreso (no se suman por separado)
   const savingsExternal = savings.filter(sv=>!sv.fromIncome).reduce((s,sv)=>s+sv.amount,0);
-  const savingsTotal = savings.reduce((s,sv)=>s+sv.amount,0); // solo para mostrar en breakdown
-  const allTxIncome = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-  const allTxExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
-  const todayD = new Date(); todayD.setHours(12,0,0,0);
-  const dueBills = bills.filter(b=>b.status==='pending'&&b.dueDate&&new Date(b.dueDate+'T12:00:00')<=todayD).reduce((s,b)=>s+b.amount,0);
-  const dueExpected = expectedIncome.filter(e=>(e.status==='pending'||e.status==='overdue')&&e.expectedDate&&new Date(e.expectedDate+'T12:00:00')<=todayD).reduce((s,e)=>s+e.amount,0);
-  const patrimonioTotal = savingsExternal + allTxIncome - allTxExpense - dueBills + dueExpected;
-  switch(id){
-    case 'patrimonio': {
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2,'0')+'/'+String(today.getMonth()+1).padStart(2,'0');
-      const isPositive = patrimonioTotal >= 0;
-      return `<div class="patrimonio-card" onclick="goTo('savings')" style="cursor:pointer">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;opacity:.45">Patrimonio neto</div>
-          <div style="font-size:10px;opacity:.35;font-weight:500">${dd}</div>
-        </div>
-        <div style="font-size:42px;font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:4px;color:${isPositive?'#fff':'#FF6B6B'}">${fmt(patrimonioTotal)}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px">
-          <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.45;margin-bottom:4px">Ingresos</div>
-            <div style="font-size:15px;font-weight:700;color:#4DF0A0">+${fmt(allTxIncome)}</div>
+  const allIncome = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const allExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const patrimonio = savingsExternal + allIncome - allExpense;
+
+  const monthTx = transactions.filter(t=>txInMonth(t,y,m));
+  const gastosEsteMes = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const numGastos = monthTx.filter(t=>t.type==='expense').length;
+
+  const pagosPendientes = bills.filter(b=>{
+    if(b.status!=='pending') return false;
+    if(!b.dueDate) return true;
+    const d=new Date(b.dueDate+'T12:00:00');
+    return d.getFullYear()===y && d.getMonth()===m;
+  }).reduce((s,b)=>s+b.amount,0);
+
+  const ingresosPendientes = expectedIncome.filter(e=>{
+    if(e.status!=='pending'&&e.status!=='overdue') return false;
+    if(!e.expectedDate) return true;
+    const d=new Date(e.expectedDate+'T12:00:00');
+    return d.getFullYear()===y && d.getMonth()===m;
+  }).reduce((s,e)=>s+e.amount,0);
+
+  document.getElementById('home-stats').innerHTML = `
+    <div class="home-stat-card full" onclick="goTo('savings')">
+      <div class="home-stat-label">Patrimonio total</div>
+      <div class="home-stat-value patrimonio ${patrimonio>=0?'c-income':'c-expense'}">${fmt(patrimonio)}</div>
+      <div class="home-stat-sub">Ahorro + ingresos acumulados</div>
+    </div>
+    <div class="home-stat-card" onclick="goTo('gastos')">
+      <div class="home-stat-label">Gastos este mes</div>
+      <div class="home-stat-value c-expense">${fmt(gastosEsteMes)}</div>
+      <div class="home-stat-sub">${numGastos} movimiento${numGastos!==1?'s':''}</div>
+    </div>
+    <div class="home-stat-card" onclick="goTo('gastos')">
+      <div class="home-stat-label">Pagos pendientes</div>
+      <div class="home-stat-value ${pagosPendientes>0?'c-expense':'c-income'}">${fmt(pagosPendientes)}</div>
+      <div class="home-stat-sub">Este mes</div>
+    </div>
+    <div class="home-stat-card" onclick="goTo('ingresos')">
+      <div class="home-stat-label">Ingresos pendientes</div>
+      <div class="home-stat-value ${ingresosPendientes>0?'c-income':'c-expense'}">${fmt(ingresosPendientes)}</div>
+      <div class="home-stat-sub">Por cobrar</div>
+    </div>
+  `;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  GASTOS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let gastosFilter = 'all';
+function setGastosFilter(f, el){
+  gastosFilter = f;
+  document.querySelectorAll('#gastos-profile-filter .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderGastos();
+}
+function renderGastos(){
+  const ff = i => gastosFilter==='all' || (i.profile||'personal')===gastosFilter;
+  const gastosTx = transactions.filter(t=>t.type==='expense'&&ff(t))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const gastosTotal = gastosTx.reduce((s,t)=>s+t.amount,0);
+  const subs = subscriptions.filter(s=>s.active&&ff(s));
+  const subsMonthly = subs.reduce((sum,s)=>{
+    const f={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};
+    return sum+s.amount*(f[s.cycle]||1);
+  },0);
+  const pendingBills = bills.filter(b=>b.status==='pending'&&ff(b));
+  const billsTotal = pendingBills.reduce((s,b)=>s+b.amount,0);
+  document.getElementById('gastos-sub').textContent = `Total estimado: ${fmt(gastosTotal + subsMonthly + billsTotal)}`;
+
+  const subMini = s=>{
+    const d=daysUntil(s.day);
+    const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';
+    const lbl=d===0?'Hoy':d===1?'Mañana':`${d}d`;
+    const pTag = `<span class="profile-tag ${s.profile||'personal'}">${(s.profile||'personal')==='business'?'🏢':'👤'}</span>`;
+    return `<div class="sub-card">
+      <div class="sub-icon">${s.emoji||'📦'}</div>
+      <div class="sub-info">
+        <div class="sub-name">${s.name}${pTag}</div>
+        <div class="sub-meta">Día ${s.day} · <span class="days-badge ${cls}">${lbl}</span></div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-amount">${fmt(s.amount)}</div>
+        <div class="sub-cycle">${{monthly:'Mensual',annual:'Anual',weekly:'Semanal',quarterly:'Trimestral'}[s.cycle]||s.cycle}</div>
+      </div>
+    </div>`;
+  };
+  const billMini = b=>{
+    const info = billDueInfo(b.dueDate);
+    return `<div class="bill-row">
+      <div style="font-size:22px;flex-shrink:0">${b.emoji||'💳'}</div>
+      <div style="flex:1;min-width:0"><div class="row-name">${b.name}</div><div class="row-meta">${b.dueDate?fmtDate(b.dueDate):'Sin fecha'}</div></div>
+      <div style="text-align:right"><div class="row-amount c-expense">${fmt(b.amount)}</div><span class="bill-due ${info.cls}">${info.label}</span></div>
+    </div>`;
+  };
+  document.getElementById('gastos-content').innerHTML = `
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Gastos generales <span class="section-card-total c-expense">${fmt(gastosTotal)}</span></span>
+        <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="goTo('transactions')">Ver todos</button>
+      </div>
+      ${gastosTx.length ? gastosTx.slice(0,8).map(t=>{
+        const cat=getCat(t.type,t.category);
+        const pTag=`<span class="profile-tag ${t.profile||'personal'}">${(t.profile||'personal')==='business'?'🏢':'👤'}</span>`;
+        return `<div class="tx-row">
+          <div class="tx-icon c-expense">${cat.emoji}</div>
+          <div class="tx-info"><div class="tx-name">${t.description}${pTag}</div><div class="tx-meta">${fmtDate(t.date)} · ${cat.name}</div></div>
+          <div class="tx-right"><div class="tx-amount c-expense">−${fmt(t.amount)}</div></div>
+          <div class="tx-actions">
+            <button class="btn-icon" onclick="openTxModal('${t.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
           </div>
-          <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.45;margin-bottom:4px">Gastos</div>
-            <div style="font-size:15px;font-weight:700;color:#FF7A7A">−${fmt(allTxExpense)}</div>
+        </div>`;
+      }).join('') : '<div class="empty-state" style="padding:24px 0"><div class="e-icon">💸</div><p>Sin gastos registrados</p></div>'}
+    </div>
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Suscripciones <span class="section-card-total c-expense">${fmt(subsMonthly)}/mes</span></span>
+        <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="goTo('subscriptions')">Gestionar</button>
+      </div>
+      <div class="subs-grid">${subs.length ? subs.slice(0,4).map(subMini).join('') : '<div class="empty-state" style="padding:24px 0;grid-column:1/-1"><p>Sin suscripciones activas</p></div>'}</div>
+    </div>
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Pagos pendientes <span class="section-card-total c-expense">${fmt(billsTotal)}</span></span>
+        <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="goTo('bills')">Ver todos</button>
+      </div>
+      ${pendingBills.length ? pendingBills.slice(0,5).map(billMini).join('') : '<div class="empty-state" style="padding:24px 0"><p>Sin pagos pendientes</p></div>'}
+    </div>
+  `;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INGRESOS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let ingresosFilter = 'all';
+function setIngresosFilter(f, el){
+  ingresosFilter = f;
+  document.querySelectorAll('#ingresos-profile-filter .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderIngresos();
+}
+function renderIngresos(){
+  const ff = i => ingresosFilter==='all' || (i.profile||'personal')===ingresosFilter;
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const monthIncomeTx = transactions.filter(t=>t.type==='income'&&ff(t)&&txInMonth(t,y,m))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const monthTotal = monthIncomeTx.reduce((s,t)=>s+t.amount,0);
+  const pendingExp = expectedIncome.filter(e=>(e.status==='pending'||e.status==='overdue')&&ff(e))
+    .sort((a,b)=>new Date(a.expectedDate)-new Date(b.expectedDate));
+  const pendingExpTotal = pendingExp.reduce((s,e)=>s+e.amount,0);
+  const savingsFiltered = savings.filter(sv=>ff(sv));
+  const savingsTotal = savingsFiltered.reduce((s,sv)=>s+sv.amount,0);
+  document.getElementById('ingresos-sub').textContent = `Este mes: ${fmt(monthTotal)}`;
+
+  const expMini = e=>{
+    const sc=e.status==='overdue'?'badge-overdue':'badge-pending';
+    const sl=e.status==='overdue'?'Vencido':'Pendiente';
+    const pTag=`<span class="profile-tag ${e.profile||'personal'}">${(e.profile||'personal')==='business'?'🏢':'👤'}</span>`;
+    return `<div class="exp-row">
+      <div class="status-dot dot-${e.status}"></div>
+      <div style="flex:1;min-width:0"><div class="row-name">${e.source}${pTag}</div><div class="row-meta">${fmtDate(e.expectedDate)}</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="row-amount c-income">${fmt(e.amount)}</span>
+        <span class="status-badge ${sc}">${sl}</span>
+      </div>
+    </div>`;
+  };
+  document.getElementById('ingresos-content').innerHTML = `
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Ingresos este mes <span class="section-card-total c-income">${fmt(monthTotal)}</span></span>
+        <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="goTo('transactions')">Ver todos</button>
+      </div>
+      ${monthIncomeTx.length ? monthIncomeTx.slice(0,8).map(t=>{
+        const cat=getCat(t.type,t.category);
+        const pTag=`<span class="profile-tag ${t.profile||'personal'}">${(t.profile||'personal')==='business'?'🏢':'👤'}</span>`;
+        return `<div class="tx-row">
+          <div class="tx-icon c-income">${cat.emoji}</div>
+          <div class="tx-info"><div class="tx-name">${t.description}${pTag}</div><div class="tx-meta">${fmtDate(t.date)} · ${cat.name}</div></div>
+          <div class="tx-right"><div class="tx-amount c-income">+${fmt(t.amount)}</div></div>
+          <div class="tx-actions">
+            <button class="btn-icon" onclick="openTxModal('${t.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
           </div>
-          ${savingsExternal>0?`<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.45;margin-bottom:4px">Ahorro ext.</div>
-            <div style="font-size:15px;font-weight:700;color:#A5B4FC">+${fmt(savingsExternal)}</div>
-          </div>`:''}
-          ${dueBills>0?`<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.45;margin-bottom:4px">Vencidos</div>
-            <div style="font-size:15px;font-weight:700;color:#FF7A7A">−${fmt(dueBills)}</div>
-          </div>`:''}
-          ${dueExpected>0?`<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;opacity:.45;margin-bottom:4px">Cobros hoy</div>
-            <div style="font-size:15px;font-weight:700;color:#4DF0A0">+${fmt(dueExpected)}</div>
-          </div>`:''}
-        </div>
-        ${savings.length ? `<div class="patrimonio-accounts">${savings.slice(0,5).map(sv=>`
-          <div><div style="font-size:10px;opacity:.4;font-weight:600;margin-bottom:3px">${sv.emoji||'💰'} ${sv.name}</div>
-          <div style="font-size:14px;font-weight:700">${fmt(sv.amount)}</div></div>`).join('')}
-          ${savings.length>5?`<div style="opacity:.3;align-self:flex-end;font-size:11px">+${savings.length-5} más</div>`:''}
-        </div>` : `<div style="opacity:.35;font-size:12px;margin-top:16px">Sin cuentas · toca para añadir →</div>`}
-      </div>`;
-    }
-    case 'stats': {
-      const balance=totalIncome-totalExpense;
-      const monthPendExp = expectedIncome.filter(e=>{
-        if(e.status!=='pending'&&e.status!=='overdue') return false;
-        if(!e.expectedDate) return true;
-        const d=new Date(e.expectedDate+'T12:00:00');
-        return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;
-      }).reduce((s,e)=>s+e.amount,0);
-      const totalPendiente = patrimonioTotal + monthPendExp;
-      return `<div class="stats-grid" style="margin-bottom:0">
-        <div class="stat-card"><div class="stat-label">Ingresos</div><div class="stat-value c-income">${fmt(totalIncome)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='income').length} mov.</div></div>
-        <div class="stat-card"><div class="stat-label">Gastos</div><div class="stat-value c-expense">${fmt(totalExpense)}</div><div class="stat-sub">${monthTx.filter(t=>t.type==='expense').length} mov.</div></div>
-        <div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value ${balance>=0?'c-income':'c-expense'}">${fmt(balance)}</div><div class="stat-sub">${balance>=0?'Superávit':'Déficit'}</div></div>
-        <div class="stat-card"><div class="stat-label">Total pendiente</div><div class="stat-value">${fmt(totalPendiente)}</div><div class="stat-sub">patrimonio + pend. mes</div></div>
-      </div>`;
-    }
-    case 'pending-bills': {
-      const mb=bills.filter(b=>{if(b.status!=='pending')return false;if(!b.dueDate)return true;const d=new Date(b.dueDate+'T12:00:00');return d.getFullYear()===viewYear&&d.getMonth()===viewMonth;});
-      const totalB=mb.reduce((s,b)=>s+b.amount,0);
-      return `<div class="card"><div class="card-title">Pagos pendientes del mes</div>
-        ${mb.length?`<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
-          <span style="font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--expense)">${fmt(totalB)}</span>
-          <span style="font-size:12px;color:var(--muted)">${mb.length} pago${mb.length!==1?'s':''}</span></div>
-          ${mb.slice(0,4).map(b=>{const due=billDueInfo(b.dueDate,b.status);return `<div class="list-row">
-            <div class="row-left"><div class="row-icon">${b.emoji||'💳'}</div><div><div class="row-name">${b.name}</div><div class="row-meta">${b.note||''}</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-expense">${fmt(b.amount)}</span><span class="bill-due ${due.cls}">${due.label}</span></div>
-          </div>`;}).join('')}`
-        :'<div class="empty-state" style="padding:16px 0"><p>Sin pagos pendientes este mes ✓</p></div>'}
-      </div>`;
-    }
-    case 'top-cats': {
-      const ibc={},ebc={};
-      monthTx.filter(t=>t.type==='income').forEach(t=>{ibc[t.category]=(ibc[t.category]||0)+t.amount;});
-      monthTx.filter(t=>t.type==='expense').forEach(t=>{ebc[t.category]=(ebc[t.category]||0)+t.amount;});
-      const si=Object.entries(ibc).sort((a,b)=>b[1]-a[1]),maxI=si[0]?.[1]||1;
-      const se=Object.entries(ebc).sort((a,b)=>b[1]-a[1]),maxE=se[0]?.[1]||1;
-      const catRow=(type,cid,amt,total,max)=>{const c=getCat(type,cid);return `<div class="list-row">
-        <div class="row-left"><div class="row-icon">${c.emoji}</div>
-          <div><div class="row-name">${c.name}</div><div class="progress-bar" style="width:90px"><div class="progress-fill c-${type}" style="width:${Math.round(amt/max*100)}%"></div></div></div>
-        </div>
-        <div class="row-right"><div class="row-amount c-${type}">${fmt(amt)}</div><div class="row-pct">${total?Math.round(amt/total*100):0}%</div></div>
-      </div>`;};
-      return `<div class="dashboard-grid" style="margin-bottom:0">
-        <div class="card"><div class="card-title">Top Ingresos</div>${si.length?si.slice(0,5).map(([id,a])=>catRow('income',id,a,totalIncome,maxI)).join(''):'<div class="empty-state"><p>Sin ingresos</p></div>'}</div>
-        <div class="card"><div class="card-title">Top Gastos</div>${se.length?se.slice(0,5).map(([id,a])=>catRow('expense',id,a,totalExpense,maxE)).join(''):'<div class="empty-state"><p>Sin gastos</p></div>'}</div>
-      </div>`;
-    }
-    case 'upcoming': {
-      const as=subscriptions.filter(s=>s.active).sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
-      const pe=expectedIncome.filter(e=>e.status==='pending'||e.status==='overdue').sort((a,b)=>new Date(a.expectedDate)-new Date(b.expectedDate));
-      return `<div class="dashboard-grid" style="margin-bottom:0">
-        <div class="card"><div class="card-title">Próximas Suscripciones</div>
-          ${as.length?as.slice(0,5).map(s=>{const d=daysUntil(s.day);const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';const lbl=d===0?'Hoy':d===1?'Mañana':`${d}d`;return `<div class="upcoming-item">
-            <div class="row-left"><div class="row-icon">${s.emoji||'📦'}</div><div><div class="row-name">${s.name}</div><div class="row-meta">Día ${s.day}</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-expense">${fmt(s.amount)}</span><span class="days-badge ${cls}">${lbl}</span></div>
-          </div>`;}).join(''):'<div class="empty-state"><p>Sin suscripciones</p></div>'}
-        </div>
-        <div class="card"><div class="card-title">Ingresos Esperados</div>
-          ${pe.length?pe.slice(0,5).map(e=>{const sc=e.status==='overdue'?'badge-overdue':'badge-pending';const sl=e.status==='overdue'?'Vencido':'Pendiente';return `<div class="list-row">
-            <div class="row-left"><div class="row-icon">${getCat('income',e.category).emoji}</div><div><div class="row-name">${e.source}</div><div class="row-meta">${fmtDate(e.expectedDate)}</div></div></div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="row-amount c-income">${fmt(e.amount)}</span><span class="status-badge ${sc}">${sl}</span></div>
-          </div>`;}).join(''):'<div class="empty-state"><p>Sin pendientes</p></div>'}
-        </div>
-      </div>`;
-    }
-    case 'recent': {
-      const rec=[...transactions].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
-      return `<div class="card"><div class="card-title">Últimos Movimientos</div>${rec.length?rec.map(t=>txRow(t,false)).join(''):'<div class="empty-state"><div class="e-icon">📭</div><p>Sin movimientos</p></div>'}</div>`;
-    }
-    default: return '';
-  }
+        </div>`;
+      }).join('') : '<div class="empty-state" style="padding:24px 0"><div class="e-icon">📭</div><p>Sin ingresos este mes</p></div>'}
+    </div>
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Ingresos esperados <span class="section-card-total c-income">${fmt(pendingExpTotal)}</span></span>
+        <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="goTo('expected')">Gestionar</button>
+      </div>
+      ${pendingExp.length ? pendingExp.slice(0,5).map(expMini).join('') : '<div class="empty-state" style="padding:24px 0"><p>Sin ingresos pendientes</p></div>'}
+    </div>
+    <div class="section-card">
+      <div class="section-card-header">
+        <span class="section-card-title">Ahorro e inversiones</span>
+        <span class="section-card-total c-income">${fmt(savingsTotal)}</span>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="goTo('savings')">Ver detalle →</button>
+    </div>
+  `;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1408,6 +1508,7 @@ function getDashBlock(id){
 let txFilter = 'all';
 let editingTxId = null;
 let currentTxType = 'income';
+let currentTxProfile = 'personal';
 
 function setTxFilter(f,el){
   txFilter=f;
@@ -1457,12 +1558,14 @@ function renderTransactions(){
     '<div class="empty-state"><div class="e-icon">📭</div><p>No hay movimientos</p></div>';
 }
 
-function openTxModal(id){
+function openTxModal(id, forceType){
   editingTxId = id||null;
   const t = id ? transactions.find(x=>x.id===id) : null;
   document.getElementById('tx-modal-title').textContent = id ? 'Editar Movimiento' : 'Nuevo Movimiento';
-  currentTxType = t?.type || 'income';
+  currentTxType = forceType || t?.type || 'income';
+  currentTxProfile = t?.profile || 'personal';
   updateTxTypeUI();
+  updateTxProfileUI();
   populateCatSelect('tx-cat', currentTxType);
   if(t){
     document.getElementById('tx-desc').value = t.description;
@@ -1486,9 +1589,20 @@ function setTxType(type){
   populateCatSelect('tx-cat',type);
 }
 
+function setTxProfile(profile){
+  currentTxProfile=profile;
+  updateTxProfileUI();
+  populateCatSelect('tx-cat',currentTxType);
+}
+
 function updateTxTypeUI(){
   document.getElementById('tog-income').classList.toggle('active',currentTxType==='income');
   document.getElementById('tog-expense').classList.toggle('active',currentTxType==='expense');
+}
+
+function updateTxProfileUI(){
+  document.getElementById('tog-personal').classList.toggle('active',currentTxProfile==='personal');
+  document.getElementById('tog-business').classList.toggle('active',currentTxProfile==='business');
 }
 
 function saveTx(){
@@ -1500,9 +1614,9 @@ function saveTx(){
   if(!desc||!amount||!date){shake('modal-tx');return;}
   if(editingTxId){
     const t=transactions.find(x=>x.id===editingTxId);
-    Object.assign(t,{type:currentTxType,description:desc,amount,category:cat,date,note});
+    Object.assign(t,{type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile});
   } else {
-    transactions.unshift({id:uid(),type:currentTxType,description:desc,amount,category:cat,date,note});
+    transactions.unshift({id:uid(),type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile});
   }
   save(STORE_KEYS.tx,transactions);
   closeModal('modal-tx');
@@ -1570,6 +1684,7 @@ function renderExpected(){
 function openExpModal(id){
   editingExpId=id||null;
   const e=id?expectedIncome.find(x=>x.id===id):null;
+  currentTxProfile=e?.profile||'personal';
   document.getElementById('exp-modal-title').textContent=id?'Editar Ingreso Esperado':'Nuevo Ingreso Esperado';
   populateCatSelect('exp-cat','income');
   if(e){
@@ -1600,9 +1715,9 @@ function saveExp(){
   if(!source||!amount||!expectedDate){shake('modal-exp');return;}
   if(editingExpId){
     const e=expectedIncome.find(x=>x.id===editingExpId);
-    Object.assign(e,{source,amount,category:cat,expectedDate,status,note});
+    Object.assign(e,{source,amount,category:cat,expectedDate,status,note,profile:currentTxProfile});
   } else {
-    expectedIncome.push({id:uid(),source,amount,category:cat,expectedDate,status,note});
+    expectedIncome.push({id:uid(),source,amount,category:cat,expectedDate,status,note,profile:currentTxProfile});
   }
   save(STORE_KEYS.exp,expectedIncome);
   closeModal('modal-exp');
@@ -1679,6 +1794,7 @@ function renderSubscriptions(){
 function openSubModal(id){
   editingSubId=id||null;
   const s=id?subscriptions.find(x=>x.id===id):null;
+  currentTxProfile=s?.profile||'personal';
   document.getElementById('sub-modal-title').textContent=id?'Editar Suscripción':'Nueva Suscripción';
   populateCatSelect('sub-cat','expense');
   if(s){
@@ -1712,9 +1828,9 @@ function saveSub(){
   if(!name||!amount){shake('modal-sub');return;}
   if(editingSubId){
     const s=subscriptions.find(x=>x.id===editingSubId);
-    Object.assign(s,{name,emoji,amount,cycle,day,category:cat,note});
+    Object.assign(s,{name,emoji,amount,cycle,day,category:cat,note,profile:currentTxProfile});
   } else {
-    subscriptions.push({id:uid(),name,emoji,amount,cycle,day,category:cat,note,active:true});
+    subscriptions.push({id:uid(),name,emoji,amount,cycle,day,category:cat,note,active:true,profile:currentTxProfile});
   }
   save(STORE_KEYS.sub,subscriptions);
   closeModal('modal-sub');
@@ -1811,6 +1927,7 @@ function toggleBillRecurring(on){
 function openBillModal(id){
   editingBillId=id||null;
   const b=id?bills.find(x=>x.id===id):null;
+  currentTxProfile=b?.profile||'personal';
   document.getElementById('bill-modal-title').textContent=id?'Editar Pago':'Nuevo Pago Pendiente';
   const recurring = b?.recurring||false;
   document.getElementById('bill-recurring').checked=recurring;
@@ -1847,9 +1964,9 @@ function saveBill(){
   if(!name||!amount){shake('modal-bill');return;}
   if(editingBillId){
     const b=bills.find(x=>x.id===editingBillId);
-    Object.assign(b,{name,emoji,amount,dueDate,status,note,recurring,recurDay});
+    Object.assign(b,{name,emoji,amount,dueDate,status,note,recurring,recurDay,profile:currentTxProfile});
   } else {
-    bills.push({id:uid(),name,emoji,amount,dueDate,status,note,recurring,recurDay});
+    bills.push({id:uid(),name,emoji,amount,dueDate,status,note,recurring,recurDay,profile:currentTxProfile});
   }
   save(STORE_KEYS.bills,bills);
   closeModal('modal-bill');
@@ -1962,10 +2079,19 @@ function deleteSavings(id){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let catModalType = 'income';
 let editingCatId = null;
+let catTab = 'personal';
+
+function setCatTab(tab){
+  catTab = tab;
+  document.getElementById('cat-tab-personal').classList.toggle('active', tab==='personal');
+  document.getElementById('cat-tab-business').classList.toggle('active', tab==='business');
+  renderCategories();
+}
 
 function renderCategories(){
+  const cats = catTab==='business' ? categoriesBusiness : categoriesPersonal;
   ['income','expense'].forEach(type=>{
-    document.getElementById('cat-'+type+'-list').innerHTML = categories[type].map(c=>`
+    document.getElementById('cat-'+type+'-list').innerHTML = (cats[type]||[]).map(c=>`
       <div class="cat-item">
         <div class="cat-left"><span>${c.emoji}</span> ${c.name}</div>
         <div style="display:flex;gap:4px">
@@ -1982,9 +2108,10 @@ function renderCategories(){
 }
 
 function openCatModal(type,id){
-  catModalType=type;editingCatId=id||null;
-  const c=id?categories[type].find(x=>x.id===id):null;
-  document.getElementById('cat-modal-title').textContent=(id?'Editar':'Nueva')+' Categoría de '+(type==='income'?'Ingreso':'Gasto');
+  catModalType=type; editingCatId=id||null;
+  const cats = catTab==='business' ? categoriesBusiness : categoriesPersonal;
+  const c = id ? (cats[type]||[]).find(x=>x.id===id) : null;
+  document.getElementById('cat-modal-title').textContent=(id?'Editar':'Nueva')+' Categoría de '+(type==='income'?'Ingreso':'Gasto')+' ('+(catTab==='business'?'Empresa':'Personal')+')';
   document.getElementById('cat-name').value=c?.name||'';
   document.getElementById('cat-emoji').value=c?.emoji||'';
   openModal('modal-cat');
@@ -1994,22 +2121,29 @@ function saveCat(){
   const name=document.getElementById('cat-name').value.trim();
   const emoji=document.getElementById('cat-emoji').value.trim()||'•';
   if(!name){shake('modal-cat');return;}
+  const cats = catTab==='business' ? categoriesBusiness : categoriesPersonal;
+  const storeKey = catTab==='business' ? STORE_KEYS.cats_business : STORE_KEYS.cats_personal;
   if(editingCatId){
-    const c=categories[catModalType].find(x=>x.id===editingCatId);
-    c.name=name;c.emoji=emoji;
+    const c=(cats[catModalType]||[]).find(x=>x.id===editingCatId);
+    if(c){c.name=name;c.emoji=emoji;}
   } else {
-    categories[catModalType].push({id:uid(),name,emoji});
+    if(!cats[catModalType]) cats[catModalType]=[];
+    cats[catModalType].push({id:uid(),name,emoji});
   }
-  save(STORE_KEYS.cats,categories);
+  if(catTab==='business') categoriesBusiness=cats; else categoriesPersonal=cats;
+  save(storeKey, cats);
   closeModal('modal-cat');
   renderCategories();
 }
 
 function deleteCat(type,id){
-  if(categories[type].length<=1){alert('Debes tener al menos una categoría.');return;}
+  const cats = catTab==='business' ? categoriesBusiness : categoriesPersonal;
+  const storeKey = catTab==='business' ? STORE_KEYS.cats_business : STORE_KEYS.cats_personal;
+  if((cats[type]||[]).length<=1){alert('Debes tener al menos una categoría.');return;}
   if(!confirm('¿Eliminar esta categoría?')) return;
-  categories[type]=categories[type].filter(c=>c.id!==id);
-  save(STORE_KEYS.cats,categories);
+  cats[type]=cats[type].filter(c=>c.id!==id);
+  if(catTab==='business') categoriesBusiness=cats; else categoriesPersonal=cats;
+  save(storeKey, cats);
   renderCategories();
 }
 
@@ -2018,7 +2152,8 @@ function deleteCat(type,id){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function populateCatSelect(selectId, type){
   const sel=document.getElementById(selectId);
-  sel.innerHTML=categories[type].map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+  const cats = getCatsForProfile(currentTxProfile);
+  sel.innerHTML=(cats[type]||[]).map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
 }
 
 function openModal(id){document.getElementById(id).classList.add('open')}
@@ -2045,23 +2180,24 @@ document.head.appendChild(style);
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function exportData(){
   const backup = {
-    version: 1,
+    version: 3,
     exportedAt: new Date().toISOString(),
     data: {
       [STORE_KEYS.tx]: transactions,
       [STORE_KEYS.exp]: expectedIncome,
       [STORE_KEYS.sub]: subscriptions,
-      [STORE_KEYS.cats]: categories,
       [STORE_KEYS.bills]: bills,
-      [STORE_KEYS.savings]: savings
+      [STORE_KEYS.savings]: savings,
+      [STORE_KEYS.cats_personal]: categoriesPersonal,
+      [STORE_KEYS.cats_business]: categoriesBusiness,
+      [STORE_KEYS.invoices]: invoices
     }
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const date = new Date().toISOString().slice(0,10);
   a.href = url;
-  a.download = `moneygest-backup-${date}.json`;
+  a.download = `moneygest-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showDataMsg('Backup descargado correctamente.', 'income');
@@ -2076,13 +2212,17 @@ function importData(e){
       const backup = JSON.parse(ev.target.result);
       if(!backup.data) throw new Error('Formato inválido');
       const d = backup.data;
+      // v3 unified keys
       if(d[STORE_KEYS.tx]) { transactions = d[STORE_KEYS.tx]; save(STORE_KEYS.tx, transactions); }
       if(d[STORE_KEYS.exp]) { expectedIncome = d[STORE_KEYS.exp]; save(STORE_KEYS.exp, expectedIncome); }
       if(d[STORE_KEYS.sub]) { subscriptions = d[STORE_KEYS.sub]; save(STORE_KEYS.sub, subscriptions); }
-      if(d[STORE_KEYS.cats]) { categories = d[STORE_KEYS.cats]; save(STORE_KEYS.cats, categories); }
       if(d[STORE_KEYS.bills]) { bills = d[STORE_KEYS.bills]; save(STORE_KEYS.bills, bills); }
       if(d[STORE_KEYS.savings]) { savings = d[STORE_KEYS.savings]; save(STORE_KEYS.savings, savings); }
-      showDataMsg('Datos importados correctamente. Puedes navegar a cualquier sección.', 'income');
+      if(d[STORE_KEYS.cats_personal]) { categoriesPersonal = d[STORE_KEYS.cats_personal]; save(STORE_KEYS.cats_personal, categoriesPersonal); }
+      if(d[STORE_KEYS.cats_business]) { categoriesBusiness = d[STORE_KEYS.cats_business]; save(STORE_KEYS.cats_business, categoriesBusiness); }
+      if(d[STORE_KEYS.invoices]) { invoices = d[STORE_KEYS.invoices]; save(STORE_KEYS.invoices, invoices); }
+      renderPage(currentPage);
+      showDataMsg('Datos importados correctamente.', 'income');
     } catch(err) {
       showDataMsg('Error al importar: archivo no válido.', 'expense');
     }
@@ -2134,7 +2274,7 @@ function restoreOriginalData() {
     // Reset migration flag so it can run again if needed
     localStorage.removeItem('fnz_migrated_v2');
     loadAllData();
-    renderDashboard();
+    renderHome();
     const diag = document.getElementById('recovery-diag');
     diag.textContent = `✅ Restaurados ${restored} conjuntos de datos:\n${log.join('\n')}`;
     diag.style.display = 'block';
@@ -2147,16 +2287,14 @@ function restoreOriginalData() {
 }
 
 function clearProfileData(skipConfirm) {
-  if (!skipConfirm && !confirm('⚠️ Esto borrará TODOS los datos del perfil activo. ¿Seguro?')) return;
-  const SK = getStoreKeys();
-  // Clear all keys for active profile
-  Object.values(SK).forEach(k => localStorage.removeItem(k));
-  // Also clear old legacy keys (fnz_tx etc.) to avoid future re-migration issues
+  if (!skipConfirm && !confirm('⚠️ Esto borrará TODOS los datos. ¿Seguro?')) return;
+  Object.values(STORE_KEYS).forEach(k => localStorage.removeItem(k));
   ['fnz_tx','fnz_exp','fnz_sub','fnz_cats','fnz_bills','fnz_savings','fnz_dash'].forEach(k => localStorage.removeItem(k));
   localStorage.removeItem('fnz_migrated_v2');
+  localStorage.removeItem('fnz_migrated_v3');
   loadAllData();
-  renderDashboard();
-  showToast('Perfil limpiado ✓');
+  renderHome();
+  showToast('Datos limpiados ✓');
 }
 
 function showDataMsg(text, type){
@@ -2169,17 +2307,14 @@ function showDataMsg(text, type){
 //  LOAD ALL DATA (profile-aware)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function loadAllData(){
-  STORE_KEYS = getStoreKeys();
   transactions = load(STORE_KEYS.tx,[]);
   expectedIncome = load(STORE_KEYS.exp,[]);
   subscriptions = load(STORE_KEYS.sub,[]);
-  const profileType = getActiveProfileType();
-  categories = load(STORE_KEYS.cats, profileType === 'business' ? DEFAULT_BIZ_CATS : DEFAULT_CATS);
+  categoriesPersonal = load(STORE_KEYS.cats_personal, DEFAULT_CATS);
+  categoriesBusiness = load(STORE_KEYS.cats_business, DEFAULT_BIZ_CATS);
   bills = load(STORE_KEYS.bills,[]);
   savings = load(STORE_KEYS.savings,[]);
-  invoices = load(STORE_KEYS.invoices, []);
-  dashConfig = load(STORE_KEYS.dash, DEFAULT_DASH);
-  DEFAULT_DASH.order.forEach(b=>{ if(!dashConfig.order.includes(b)&&!dashConfig.hidden.includes(b)) dashConfig.order.push(b); });
+  invoices = load(STORE_KEYS.invoices,[]);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2208,87 +2343,33 @@ function updateBillsBadge(){
   if(badge){ badge.textContent = n||''; badge.style.display = n?'block':'none'; }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  PROFILES
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function getProfiles() {
-  return load('fnz_profiles') || [{id:'personal',name:'Personal',emoji:'👤',type:'personal'}];
-}
-function getActiveProfile() {
-  return localStorage.getItem('fnz_active_profile') || 'personal';
-}
-function getActiveProfileType() {
-  const pid = localStorage.getItem('fnz_active_profile') || 'personal';
-  const profiles = getProfiles();
-  return profiles.find(p => p.id === pid)?.type || 'personal';
-}
-function switchProfile(id) {
-  localStorage.setItem('fnz_active_profile', id);
-  loadAllData();
-  renderDashboard();
-  goTo('dashboard');
-  updateProfileUI();
-  closeMore();
-}
-function updateProfileUI() {
-  const pid = getActiveProfile();
-  const profiles = getProfiles();
-  const p = profiles.find(x=>x.id===pid) || profiles[0];
-  const badge = document.getElementById('profile-badge');
-  if(badge) badge.innerHTML = `${p.emoji} ${p.name}`;
-  const navInv = document.getElementById('nav-invoices');
-  if (navInv) navInv.style.display = p.type === 'business' ? '' : 'none';
-}
-function saveNewProfile() {
-  const name = document.getElementById('profile-name').value.trim();
-  const emoji = document.getElementById('profile-emoji').value.trim() || '👤';
-  const type = document.getElementById('profile-type').value;
-  if(!name){ shake('modal-profile'); return; }
-  const profiles = getProfiles();
-  const id = 'p' + Date.now();
-  profiles.push({id, name, emoji, type});
-  save('fnz_profiles', profiles);
-  closeModal('modal-profile');
-  renderMoreDrawer();
-  showToast('Perfil creado ✓');
-}
 function renderMoreDrawer() {
-  const pid = getActiveProfile();
-  const profiles = getProfiles();
-  const profilesHtml = profiles.map(p=>`
-    <div class="profile-chip ${p.id===pid?'active':''}" onclick="switchProfile('${p.id}')">
-      <span style="font-size:20px">${p.emoji}</span>
-      <span style="font-size:14px;font-weight:600">${p.name}</span>
-      ${p.id===pid?'<span class="profile-check">✓</span>':''}
-    </div>`).join('');
-  const profileType = getActiveProfileType();
-  const extraItems = profileType === 'business' ? `
-  <div class="more-item" onclick="goTo('invoices');closeMore()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-    Facturas
-  </div>
-  <div class="more-item" onclick="goTo('subscriptions');closeMore()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
-    Suscripciones
-  </div>` : `
-  <div class="more-item" onclick="goTo('savings');closeMore()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/><path d="M9 8h6M9 12h6M9 16h6"/></svg>
-    Ahorro e Inversiones
-  </div>
-  <div class="more-item" onclick="goTo('expected');closeMore()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    Ingresos Esperados
-  </div>`;
   document.getElementById('more-drawer-content').innerHTML = `
-    <div class="profile-section">
-      <div class="more-title" style="padding:0 0 8px">Perfiles</div>
-      ${profilesHtml}
-      <div class="profile-chip" onclick="openModal('modal-profile')">
-        <span style="font-size:20px;opacity:.5">+</span>
-        <span style="font-size:14px;color:var(--muted)">Nuevo perfil</span>
-      </div>
+    <div class="more-title">Más opciones</div>
+    <div class="more-item" onclick="goTo('transactions');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+      Todos los movimientos
     </div>
-    ${extraItems}
+    <div class="more-item" onclick="goTo('expected');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Ingresos esperados
+    </div>
+    <div class="more-item" onclick="goTo('subscriptions');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
+      Suscripciones
+    </div>
+    <div class="more-item" onclick="goTo('bills');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Pagos pendientes
+    </div>
+    <div class="more-item" onclick="goTo('savings');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M1 21h22"/></svg>
+      Ahorro e inversiones
+    </div>
+    <div class="more-item" onclick="goTo('invoices');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Facturas
+    </div>
     <div class="more-item" onclick="goTo('categories');closeMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
       Categorías
@@ -2296,7 +2377,12 @@ function renderMoreDrawer() {
     <div class="more-item" onclick="goTo('data');closeMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Datos / Backup
-    </div>`;
+    </div>
+    <div class="more-item" onclick="toggleAiPanel();closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Asistente IA
+    </div>
+  `;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2368,7 +2454,7 @@ async function sendAiMessage() {
 
   try {
     const hasImages = aiImages.length > 0;
-    const model = hasImages ? 'google/gemini-flash-1.5:free' : 'qwen/qwen3.6-plus-preview:free';
+    const model = hasImages ? 'google/gemini-2.5-pro' : 'google/gemini-2.0-flash';
 
     const systemPrompt = hasImages
       ? `Eres un asistente que analiza capturas de pantalla de extractos bancarios y apps financieras. Extrae TODAS las transacciones visibles y devuelve SOLO un JSON válido sin markdown:\n{"actions":[{"type":"add_expense","amount":45.99,"description":"Mercadona","category":"alimentación"},{"type":"add_income","amount":2500,"description":"Nómina","category":"trabajo"}],"summary":"He encontrado X transacciones en el extracto."}\nPara cargos/débitos usa add_expense. Para abonos/créditos usa add_income. Devuelve SOLO el JSON.`
@@ -2432,17 +2518,17 @@ Devuelve SOLO el JSON, sin texto adicional.`;
     const todayStr = new Date().toISOString().split('T')[0];
 
     (parsed.actions || []).forEach(action => {
-      const SK = getStoreKeys();
       if(action.type === 'add_expense' || action.type === 'add_income') {
         const type = action.type === 'add_expense' ? 'expense' : 'income';
-        const cat = categories[type]?.find(c => c.name.toLowerCase().includes((action.category||'').toLowerCase()));
+        const cats = getCatsForProfile('personal');
+        const cat = cats.find(c => c.name.toLowerCase().includes((action.category||'').toLowerCase()));
         transactions.push({
           id: uid(), type, amount: parseFloat(action.amount)||0,
           description: action.description || (type==='expense'?'Gasto':'Ingreso'),
-          category: cat?.id || (type==='expense' ? categories.expense[0]?.id : categories.income[0]?.id),
-          date: todayStr, note: ''
+          category: cat?.id || cats[0]?.id || '',
+          date: todayStr, note: '', profile: 'personal'
         });
-        save(SK.tx, transactions);
+        save(STORE_KEYS.tx, transactions);
         executedCount++;
       } else if(action.type === 'add_saving') {
         const existing = savings.find(s => s.name.toLowerCase() === (action.name||'').toLowerCase());
@@ -2452,26 +2538,18 @@ Devuelve SOLO el JSON, sin texto adicional.`;
         } else {
           savings.push({id:uid(), name:action.name||'Ahorro', emoji:'💰', amount:parseFloat(action.amount)||0, type:'cuenta', note:'', fromIncome: action.fromIncome !== false});
         }
-        save(SK.savings, savings);
+        save(STORE_KEYS.savings, savings);
         executedCount++;
       } else if(action.type === 'mark_bill_paid') {
         const bill = bills.find(b => b.name.toLowerCase().includes((action.name||'').toLowerCase()));
-        if(bill){ bill.status = 'paid'; save(SK.bills, bills); executedCount++; }
+        if(bill){ bill.status = 'paid'; save(STORE_KEYS.bills, bills); executedCount++; }
       } else if(action.type === 'add_bill') {
-        bills.push({id:uid(), name:action.name||'Pago', emoji:action.emoji||'💳', amount:parseFloat(action.amount)||0, dueDate:'', note:'', status:'pending'});
-        save(SK.bills, bills);
+        bills.push({id:uid(), name:action.name||'Pago', emoji:action.emoji||'💳', amount:parseFloat(action.amount)||0, dueDate:'', note:'', status:'pending', profile:'personal'});
+        save(STORE_KEYS.bills, bills);
         executedCount++;
       } else if(action.type === 'clear_profile_data') {
-        clearProfileData(true); // skip confirm, AI already confirmed intent
+        clearProfileData(true);
         executedCount++;
-      } else if(action.type === 'switch_profile') {
-        const targetName = (action.name||'').toLowerCase();
-        const profiles = getProfiles();
-        const target = profiles.find(p =>
-          p.name.toLowerCase().includes(targetName) ||
-          p.type === (targetName.includes('empresa')||targetName.includes('negocio')||targetName.includes('aether') ? 'business' : 'personal')
-        );
-        if(target){ switchProfile(target.id); executedCount++; }
       }
     });
 
@@ -2481,7 +2559,7 @@ Devuelve SOLO el JSON, sin texto adicional.`;
     const summary = parsed.summary || `He procesado ${executedCount} acción(es).`;
     addAiMessage('assistant', `✅ ${summary}`);
 
-    renderDashboard();
+    renderPage(currentPage);
     if(document.getElementById('page-transactions').classList.contains('active')) renderTransactions();
     if(document.getElementById('page-bills').classList.contains('active')) renderBills();
     updateBillsBadge();
@@ -2537,9 +2615,8 @@ function saveAiApiKey() {
   showToast('API key guardada ✓');
 }
 
-renderDashboard();
+renderHome();
 updateBillsBadge();
-updateProfileUI();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INVOICES (FACTURAS)
@@ -2608,7 +2685,6 @@ function saveInvoice() {
   save(STORE_KEYS.invoices, invoices);
   closeModal('modal-invoice');
   renderInvoices();
-  renderDashboard();
 }
 
 function deleteInvoice(id) {
@@ -2616,7 +2692,6 @@ function deleteInvoice(id) {
   invoices = invoices.filter(x => x.id !== id);
   save(STORE_KEYS.invoices, invoices);
   renderInvoices();
-  renderDashboard();
 }
 
 function toggleInvoiceStatus(id) {
@@ -2625,7 +2700,6 @@ function toggleInvoiceStatus(id) {
   inv.status = inv.status === 'paid' ? 'pending' : 'paid';
   save(STORE_KEYS.invoices, invoices);
   renderInvoices();
-  renderDashboard();
 }
 
 function renderInvoices() {
@@ -2681,10 +2755,9 @@ function renderInvoices() {
     </div>`).join('');
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  BUSINESS DASHBOARD BLOCKS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function getBizDashBlock(id) {
+// [getBizDashBlock removed]
+function getBizDashBlock(id) { return ''; }
+function _getBizDashBlock_noop(id) {
   const allTxIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const allTxExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
   const monthTx = transactions.filter(txInMonth);
