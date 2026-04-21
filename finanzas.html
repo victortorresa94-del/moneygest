@@ -1215,6 +1215,15 @@ input[type="date"]{cursor:pointer}
   console.log('[MoneyGest] Migración v3 completada');
 })();
 
+// ── Migración v4: borrar datos de demo del localStorage ──
+(function clearDemoData() {
+  if (localStorage.getItem('fnz_cleared_demo')) return;
+  // Borra cualquier dato guardado localmente — Supabase es la fuente de verdad
+  ['fnz_tx','fnz_exp','fnz_sub','fnz_bills','fnz_savings','fnz_invoices'].forEach(k => localStorage.removeItem(k));
+  localStorage.setItem('fnz_cleared_demo','1');
+  console.log('[MoneyGest] Datos de demo eliminados — cargando desde Supabase');
+})();
+
 const STORE_KEYS = {
   tx: 'fnz_tx', exp: 'fnz_exp', sub: 'fnz_sub',
   bills: 'fnz_bills', savings: 'fnz_savings', invoices: 'fnz_invoices',
@@ -1406,66 +1415,7 @@ let invoices = load(STORE_KEYS.invoices,[]);
 function getCatsForProfile(profile){ return profile==='business' ? categoriesBusiness : categoriesPersonal; }
 
 // Demo data if empty
-if(!transactions.length){
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
-  const fmt = (d)=>d.toISOString().slice(0,10);
-  transactions = [
-    {id:uid(),type:'income',amount:2400,description:'Proyecto web cliente A',category:'i1',date:fmt(new Date(y,m,3)),note:'',profile:'business'},
-    {id:uid(),type:'income',amount:800,description:'Consultoría SEO',category:'i2',date:fmt(new Date(y,m,8)),note:'',profile:'business'},
-    {id:uid(),type:'income',amount:1200,description:'Nómina mensual',category:'i1',date:fmt(new Date(y,m,10)),note:'',profile:'personal'},
-    {id:uid(),type:'expense',amount:59,description:'Adobe Creative Cloud',category:'be1',date:fmt(new Date(y,m,1)),note:'',profile:'business'},
-    {id:uid(),type:'expense',amount:180,description:'Coworking',category:'be8',date:fmt(new Date(y,m,2)),note:'',profile:'business'},
-    {id:uid(),type:'expense',amount:320,description:'Google Ads',category:'be2',date:fmt(new Date(y,m,5)),note:'',profile:'business'},
-    {id:uid(),type:'expense',amount:45,description:'Gasolina',category:'e2',date:fmt(new Date(y,m,7)),note:'',profile:'personal'},
-    {id:uid(),type:'expense',amount:90,description:'Supermercado',category:'e1',date:fmt(new Date(y,m,9)),note:'',profile:'personal'},
-  ];
-  save(STORE_KEYS.tx, transactions);
-}
-
-if(!expectedIncome.length){
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
-  const fmt = (d)=>d.toISOString().slice(0,10);
-  expectedIncome = [
-    {id:uid(),source:'Proyecto rediseño app',amount:3500,category:'i1',expectedDate:fmt(new Date(y,m,25)),status:'pending',note:'Cliente B'},
-    {id:uid(),source:'Factura #045 — Hosting',amount:600,category:'i1',expectedDate:fmt(new Date(y,m,15)),status:'overdue',note:''},
-    {id:uid(),source:'Dividendos Q1',amount:250,category:'i3',expectedDate:fmt(new Date(y,m+1,5)),status:'pending',note:''},
-  ];
-  save(STORE_KEYS.exp, expectedIncome);
-}
-
-if(!subscriptions.length){
-  subscriptions = [
-    {id:uid(),name:'Netflix',emoji:'🎬',amount:17.99,cycle:'monthly',day:12,category:'e5',note:'',active:true},
-    {id:uid(),name:'Spotify',emoji:'🎵',amount:9.99,cycle:'monthly',day:18,category:'e5',note:'',active:true},
-    {id:uid(),name:'Adobe CC',emoji:'🎨',amount:59.99,cycle:'monthly',day:1,category:'e7',note:'',active:true},
-    {id:uid(),name:'Google Workspace',emoji:'📧',amount:12,cycle:'monthly',day:5,category:'e7',note:'',active:true},
-    {id:uid(),name:'Notion',emoji:'📝',amount:16,cycle:'monthly',day:20,category:'e7',note:'',active:false},
-  ];
-  save(STORE_KEYS.sub, subscriptions);
-}
-
-if(!bills.length){
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
-  const fmt2 = (d)=>d.toISOString().slice(0,10);
-  bills = [
-    {id:uid(),name:'Alquiler',emoji:'🏠',amount:750,dueDate:fmt2(new Date(y,m,1)),note:'Transferencia al propietario',status:'pending'},
-    {id:uid(),name:'Factura luz',emoji:'💡',amount:87.50,dueDate:fmt2(new Date(y,m,10)),note:'',status:'pending'},
-    {id:uid(),name:'Le debo a Carlos',emoji:'👤',amount:40,dueDate:fmt2(new Date(y,m,20)),note:'Cena del viernes',status:'pending'},
-  ];
-  save(STORE_KEYS.bills, bills);
-}
-
-if(!savings.length){
-  savings = [
-    {id:uid(),name:'Bitcoin',emoji:'₿',amount:1250,type:'crypto',note:'Binance'},
-    {id:uid(),name:'Fondo S&P 500',emoji:'📈',amount:3400,type:'fondo',note:'Myinvestor'},
-    {id:uid(),name:'Cuenta Ahorro',emoji:'🏦',amount:5000,type:'cuenta',note:'ING'},
-  ];
-  save(STORE_KEYS.savings, savings);
-}
+// (datos de demo eliminados — la fuente de verdad es Supabase)
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  HELPERS
