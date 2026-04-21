@@ -528,7 +528,10 @@ input[type="date"]{cursor:pointer}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     <span>Datos</span>
   </div>
-  <div class="sidebar-footer">v2.0</div>
+  <div class="sidebar-footer" style="display:flex;align-items:center;justify-content:space-between">
+    <span>v2.0</span>
+    <span id="sync-dot" style="display:none;font-size:13px;font-weight:700;width:20px;height:20px;align-items:center;justify-content:center;border-radius:50%;cursor:default" title=""></span>
+  </div>
 </nav>
 
 <!-- BOTTOM NAV (mobile) -->
@@ -767,6 +770,23 @@ input[type="date"]{cursor:pointer}
         Obtén tu key gratis en <strong>openrouter.ai</strong> — se guarda solo en este dispositivo, nunca se sube a internet.
       </div>
       <button class="btn btn-primary" onclick="saveAiApiKey()">Guardar key</button>
+    </div>
+    <!-- CLOUD SYNC CARD -->
+    <div class="card" style="margin-bottom:20px;max-width:760px">
+      <div class="card-title">☁️ Sincronización en la nube</div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>Clave de sincronización (MONEYGEST_API_KEY)</label>
+        <input type="password" id="sync-key-input" placeholder="Tu clave secreta de MoneyGest" autocomplete="off">
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+        Introduce la misma clave que configuraste como <strong>MONEYGEST_API_KEY</strong> en Vercel.
+        Los datos se sincronizan automáticamente tras cada cambio y puedes usarlos desde Claude AI en cualquier dispositivo.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveSyncKey()">Guardar clave</button>
+        <button class="btn btn-ghost" onclick="loadFromServer()">↓ Cargar desde nube</button>
+        <button class="btn btn-ghost" onclick="doSyncToServer()">↑ Subir a nube ahora</button>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:760px">
       <div class="card">
@@ -1203,7 +1223,89 @@ const DEFAULT_CATS = {
 };
 
 function load(key,def){try{return JSON.parse(localStorage.getItem(key))||def}catch{return def}}
-function save(key,val){localStorage.setItem(key,JSON.stringify(val))}
+function save(key,val){localStorage.setItem(key,JSON.stringify(val));scheduleSyncToServer();}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CLOUD SYNC (Supabase via /api/data)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _syncTimer = null;
+let _blockSync = false;
+
+function scheduleSyncToServer() {
+  if (_blockSync) return;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(doSyncToServer, 2000);
+}
+
+async function doSyncToServer() {
+  const key = localStorage.getItem('fnz_sync_key');
+  if (!key) return;
+  try {
+    setSyncDot('syncing');
+    const body = {
+      tx:           transactions.map(t  => { const c={...t};  delete c.attachment; return c; }),
+      exp:          expectedIncome,
+      sub:          subscriptions,
+      bills:        bills,
+      savings:      savings,
+      invoices:     invoices.map(inv => { const c={...inv}; delete c.attachment; return c; }),
+      cats_personal: categoriesPersonal,
+      cats_business: categoriesBusiness
+    };
+    const resp = await fetch('/api/data', {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    setSyncDot(resp.ok ? 'ok' : 'err');
+  } catch(e) { setSyncDot('err'); }
+}
+
+async function loadFromServer() {
+  const key = localStorage.getItem('fnz_sync_key');
+  if (!key) { showToast('⚠️ Configura tu clave de sincronización en Datos → Nube'); return; }
+  try {
+    setSyncDot('syncing');
+    const resp = await fetch('/api/data', { headers: { 'Authorization': `Bearer ${key}` } });
+    if (!resp.ok) { setSyncDot('err'); showToast('❌ Error de sincronización: ' + resp.status); return; }
+    const d = await resp.json();
+    if (!d || !d.id) { setSyncDot('ok'); showToast('La nube está vacía — sube tus datos primero'); return; }
+    _blockSync = true;
+    if (Array.isArray(d.tx)       && d.tx.length)       { transactions    = d.tx;       localStorage.setItem(STORE_KEYS.tx,           JSON.stringify(transactions)); }
+    if (Array.isArray(d.exp)      && d.exp.length)      { expectedIncome  = d.exp;      localStorage.setItem(STORE_KEYS.exp,          JSON.stringify(expectedIncome)); }
+    if (Array.isArray(d.sub)      && d.sub.length)      { subscriptions   = d.sub;      localStorage.setItem(STORE_KEYS.sub,          JSON.stringify(subscriptions)); }
+    if (Array.isArray(d.bills)    && d.bills.length)    { bills           = d.bills;    localStorage.setItem(STORE_KEYS.bills,        JSON.stringify(bills)); }
+    if (Array.isArray(d.savings)  && d.savings.length)  { savings         = d.savings;  localStorage.setItem(STORE_KEYS.savings,      JSON.stringify(savings)); }
+    if (Array.isArray(d.invoices) && d.invoices.length) { invoices        = d.invoices; localStorage.setItem(STORE_KEYS.invoices,     JSON.stringify(invoices)); }
+    if (d.cats_personal) { categoriesPersonal = d.cats_personal; localStorage.setItem(STORE_KEYS.cats_personal, JSON.stringify(categoriesPersonal)); }
+    if (d.cats_business) { categoriesBusiness = d.cats_business; localStorage.setItem(STORE_KEYS.cats_business, JSON.stringify(categoriesBusiness)); }
+    _blockSync = false;
+    renderHome();
+    setSyncDot('ok');
+    showToast('☁️ Datos sincronizados desde la nube');
+  } catch(e) { _blockSync = false; setSyncDot('err'); showToast('❌ Error: ' + e.message); }
+}
+
+function setSyncDot(state) {
+  const dot = document.getElementById('sync-dot');
+  if (!dot) return;
+  dot.style.display = 'flex';
+  if (state === 'syncing') {
+    dot.title = 'Sincronizando…'; dot.style.color = 'var(--muted)'; dot.textContent = '↻';
+  } else if (state === 'ok') {
+    dot.title = 'Sincronizado'; dot.style.color = 'var(--income)'; dot.textContent = '✓';
+    setTimeout(() => { dot.style.display = 'none'; }, 3000);
+  } else {
+    dot.title = 'Error de sincronización (revisa la clave en Datos)';
+    dot.style.color = 'var(--expense)'; dot.textContent = '⚠';
+  }
+}
+
+function saveSyncKey() {
+  const val = document.getElementById('sync-key-input').value.trim();
+  localStorage.setItem('fnz_sync_key', val);
+  showToast('Clave de sincronización guardada ✓');
+}
 
 let transactions = load(STORE_KEYS.tx,[]);
 let expectedIncome = load(STORE_KEYS.exp,[]);
@@ -2732,6 +2834,8 @@ function toggleVoiceInput() {
 function renderDataPage() {
   const keyInput = document.getElementById('ai-api-key-input');
   if(keyInput) keyInput.value = localStorage.getItem('fnz_openrouter_key') || '';
+  const syncInput = document.getElementById('sync-key-input');
+  if(syncInput) syncInput.value = localStorage.getItem('fnz_sync_key') || '';
 }
 
 function saveAiApiKey() {
@@ -2840,6 +2944,8 @@ async function extractAndFill(file, context) {
 
 renderHome();
 updateBillsBadge();
+// Auto-sync from cloud on startup (silent if no key configured)
+loadFromServer();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INVOICES (FACTURAS)
