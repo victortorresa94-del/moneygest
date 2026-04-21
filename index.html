@@ -1228,8 +1228,9 @@ function save(key,val){localStorage.setItem(key,JSON.stringify(val));scheduleSyn
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  CLOUD SYNC (Supabase via /api/data)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-let _syncTimer = null;
-let _blockSync = false;
+let _syncTimer    = null;
+let _blockSync    = false;
+let _lastSyncTs   = parseInt(localStorage.getItem('fnz_last_sync_ts') || '0');
 
 function scheduleSyncToServer() {
   if (_blockSync) return;
@@ -1243,12 +1244,12 @@ async function doSyncToServer() {
   try {
     setSyncDot('syncing');
     const body = {
-      tx:           transactions.map(t  => { const c={...t};  delete c.attachment; return c; }),
-      exp:          expectedIncome,
-      sub:          subscriptions,
-      bills:        bills,
-      savings:      savings,
-      invoices:     invoices.map(inv => { const c={...inv}; delete c.attachment; return c; }),
+      tx:            transactions.map(t   => { const c={...t};   delete c.attachment; return c; }),
+      exp:           expectedIncome,
+      sub:           subscriptions,
+      bills:         bills,
+      savings:       savings,
+      invoices:      invoices.map(inv => { const c={...inv}; delete c.attachment; return c; }),
       cats_personal: categoriesPersonal,
       cats_business: categoriesBusiness
     };
@@ -1257,33 +1258,70 @@ async function doSyncToServer() {
       headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    setSyncDot(resp.ok ? 'ok' : 'err');
+    if (resp.ok) {
+      _lastSyncTs = Date.now();
+      localStorage.setItem('fnz_last_sync_ts', _lastSyncTs);
+      setSyncDot('ok');
+    } else {
+      setSyncDot('err');
+    }
   } catch(e) { setSyncDot('err'); }
 }
 
-async function loadFromServer() {
+// opts.silent = no toasts, no setSyncDot; opts.force = ignore timestamp check
+async function loadFromServer(opts = {}) {
   const key = localStorage.getItem('fnz_sync_key');
-  if (!key) { showToast('⚠️ Configura tu clave de sincronización en Datos → Nube'); return; }
+  if (!key) {
+    if (!opts.silent) showToast('⚠️ Configura tu clave de sincronización en Datos → Nube');
+    return;
+  }
   try {
-    setSyncDot('syncing');
+    if (!opts.silent) setSyncDot('syncing');
     const resp = await fetch('/api/data', { headers: { 'Authorization': `Bearer ${key}` } });
-    if (!resp.ok) { setSyncDot('err'); showToast('❌ Error de sincronización: ' + resp.status); return; }
+    if (!resp.ok) {
+      if (!opts.silent) { setSyncDot('err'); showToast('❌ Error de sincronización: ' + resp.status); }
+      return;
+    }
     const d = await resp.json();
-    if (!d || !d.id) { setSyncDot('ok'); showToast('La nube está vacía — sube tus datos primero'); return; }
+    if (!d || !d.id) {
+      if (!opts.silent) { setSyncDot('ok'); showToast('La nube está vacía — sube tus datos primero (↑)'); }
+      return;
+    }
+
+    // En modo polling: solo aplicar si el servidor tiene datos más nuevos
+    const serverTs = d.updated_at ? new Date(d.updated_at).getTime() : 0;
+    if (opts.silent && !opts.force && serverTs <= _lastSyncTs + 5000) return;
+
     _blockSync = true;
-    if (Array.isArray(d.tx)       && d.tx.length)       { transactions    = d.tx;       localStorage.setItem(STORE_KEYS.tx,           JSON.stringify(transactions)); }
-    if (Array.isArray(d.exp)      && d.exp.length)      { expectedIncome  = d.exp;      localStorage.setItem(STORE_KEYS.exp,          JSON.stringify(expectedIncome)); }
-    if (Array.isArray(d.sub)      && d.sub.length)      { subscriptions   = d.sub;      localStorage.setItem(STORE_KEYS.sub,          JSON.stringify(subscriptions)); }
-    if (Array.isArray(d.bills)    && d.bills.length)    { bills           = d.bills;    localStorage.setItem(STORE_KEYS.bills,        JSON.stringify(bills)); }
-    if (Array.isArray(d.savings)  && d.savings.length)  { savings         = d.savings;  localStorage.setItem(STORE_KEYS.savings,      JSON.stringify(savings)); }
-    if (Array.isArray(d.invoices) && d.invoices.length) { invoices        = d.invoices; localStorage.setItem(STORE_KEYS.invoices,     JSON.stringify(invoices)); }
+    // Aplicar TODOS los arrays del servidor (incluyendo vacíos — el MCP puede haberlos borrado)
+    if (Array.isArray(d.tx))       { transactions    = d.tx;       localStorage.setItem(STORE_KEYS.tx,           JSON.stringify(transactions)); }
+    if (Array.isArray(d.exp))      { expectedIncome  = d.exp;      localStorage.setItem(STORE_KEYS.exp,          JSON.stringify(expectedIncome)); }
+    if (Array.isArray(d.sub))      { subscriptions   = d.sub;      localStorage.setItem(STORE_KEYS.sub,          JSON.stringify(subscriptions)); }
+    if (Array.isArray(d.bills))    { bills           = d.bills;    localStorage.setItem(STORE_KEYS.bills,        JSON.stringify(bills)); }
+    if (Array.isArray(d.savings))  { savings         = d.savings;  localStorage.setItem(STORE_KEYS.savings,      JSON.stringify(savings)); }
+    if (Array.isArray(d.invoices)) { invoices        = d.invoices; localStorage.setItem(STORE_KEYS.invoices,     JSON.stringify(invoices)); }
     if (d.cats_personal) { categoriesPersonal = d.cats_personal; localStorage.setItem(STORE_KEYS.cats_personal, JSON.stringify(categoriesPersonal)); }
     if (d.cats_business) { categoriesBusiness = d.cats_business; localStorage.setItem(STORE_KEYS.cats_business, JSON.stringify(categoriesBusiness)); }
     _blockSync = false;
-    renderHome();
-    setSyncDot('ok');
-    showToast('☁️ Datos sincronizados desde la nube');
-  } catch(e) { _blockSync = false; setSyncDot('err'); showToast('❌ Error: ' + e.message); }
+
+    _lastSyncTs = serverTs || Date.now();
+    localStorage.setItem('fnz_last_sync_ts', _lastSyncTs);
+
+    renderPage(currentPage || 'home');
+    if (!opts.silent) { setSyncDot('ok'); showToast('☁️ Datos sincronizados'); }
+  } catch(e) {
+    _blockSync = false;
+    if (!opts.silent) { setSyncDot('err'); showToast('❌ Error: ' + e.message); }
+  }
+}
+
+// Polling automático cada 30s — detecta cambios hechos por Claude MCP
+function startSyncPolling() {
+  const key = localStorage.getItem('fnz_sync_key');
+  if (!key) return;
+  setInterval(() => {
+    if (localStorage.getItem('fnz_sync_key')) loadFromServer({ silent: true });
+  }, 30000);
 }
 
 function setSyncDot(state) {
@@ -1293,10 +1331,10 @@ function setSyncDot(state) {
   if (state === 'syncing') {
     dot.title = 'Sincronizando…'; dot.style.color = 'var(--muted)'; dot.textContent = '↻';
   } else if (state === 'ok') {
-    dot.title = 'Sincronizado'; dot.style.color = 'var(--income)'; dot.textContent = '✓';
+    dot.title = 'Sincronizado ✓'; dot.style.color = 'var(--income)'; dot.textContent = '✓';
     setTimeout(() => { dot.style.display = 'none'; }, 3000);
   } else {
-    dot.title = 'Error de sincronización (revisa la clave en Datos)';
+    dot.title = 'Error de sync — revisa la clave en Datos';
     dot.style.color = 'var(--expense)'; dot.textContent = '⚠';
   }
 }
@@ -1304,7 +1342,10 @@ function setSyncDot(state) {
 function saveSyncKey() {
   const val = document.getElementById('sync-key-input').value.trim();
   localStorage.setItem('fnz_sync_key', val);
-  showToast('Clave de sincronización guardada ✓');
+  _lastSyncTs = 0; // forzar re-descarga en el próximo ciclo
+  localStorage.setItem('fnz_last_sync_ts', '0');
+  showToast('Clave guardada ✓');
+  startSyncPolling(); // arrancar polling si no estaba activo
 }
 
 let transactions = load(STORE_KEYS.tx,[]);
@@ -2944,8 +2985,9 @@ async function extractAndFill(file, context) {
 
 renderHome();
 updateBillsBadge();
-// Auto-sync from cloud on startup (silent if no key configured)
-loadFromServer();
+// Al arrancar: sincronizar desde nube + arrancar polling cada 30s
+loadFromServer({ silent: true, force: true });
+startSyncPolling();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INVOICES (FACTURAS)
