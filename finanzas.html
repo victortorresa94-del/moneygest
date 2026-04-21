@@ -591,21 +591,14 @@ input[type="date"]{cursor:pointer}
         + Ingreso
       </button>
     </div>
-    <!-- ── Banner setup sincronización (estático para PWA/iOS) ── -->
+    <!-- ── Banner setup sincronización ── -->
     <div id="home-setup-banner" style="display:none;margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,#5856D6,#7B79E0);color:#fff;border-radius:16px;padding:18px 20px">
-        <div style="font-weight:700;font-size:15px;margin-bottom:4px">☁️ Configura la sincronización</div>
-        <div style="font-size:12px;opacity:.85;margin-bottom:14px">Introduce tu clave API para cargar tus datos desde la nube</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="text" id="quick-sync-key"
-            placeholder="MONEYGEST_API_KEY"
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            onkeydown="if(event.key==='Enter')quickSetupSync()"
-            onclick="event.stopPropagation();this.focus()"
-            ontouchend="event.stopPropagation();setTimeout(()=>this.focus(),80)"
-            style="flex:1;min-width:160px;padding:11px 14px;border-radius:10px;border:none;font-size:16px;background:#fff;color:#333;-webkit-user-select:text;user-select:text;outline:none;touch-action:manipulation;-webkit-appearance:none;appearance:none">
-          <button onclick="quickSetupSync()" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;color:#fff;cursor:pointer;white-space:nowrap;touch-action:manipulation">Conectar</button>
+      <div style="background:linear-gradient(135deg,#5856D6,#7B79E0);color:#fff;border-radius:16px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:3px">☁️ Sin datos en este dispositivo</div>
+          <div style="font-size:12px;opacity:.85">Conecta tu clave API para cargar tus datos desde la nube</div>
         </div>
+        <button onclick="openSyncSetupModal()" style="background:#fff;color:#5856D6;border:none;border-radius:10px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0">Conectar →</button>
       </div>
     </div>
     <div class="home-stats" id="home-stats"></div>
@@ -1196,6 +1189,31 @@ input[type="date"]{cursor:pointer}
   </div>
 </div>
 
+<!-- ── MODAL: SYNC SETUP ── -->
+<div class="overlay" id="modal-sync-setup">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">☁️ Conectar con la nube</div>
+      <button class="close-btn" onclick="closeModal('modal-sync-setup')">&times;</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">
+      Introduce tu clave <strong>MONEYGEST_API_KEY</strong> para cargar tus datos. La encontrarás en la configuración de Vercel.
+    </p>
+    <div class="form-group full" style="margin-bottom:20px">
+      <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">API Key</label>
+      <input type="text" id="modal-sync-key-input"
+        placeholder="Pega aquí tu clave..."
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter')saveModalSyncKey()"
+        style="width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--border);font-size:16px;font-family:inherit;background:#fff;color:var(--text);outline:none">
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sync-setup')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveModalSyncKey()" style="flex:1">Conectar y cargar datos</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  DATA LAYER
@@ -1443,6 +1461,27 @@ function quickSetupSync() {
   loadFromServer({ force: true });
 }
 
+function openSyncSetupModal() {
+  const inp = document.getElementById('modal-sync-key-input');
+  if(inp) inp.value = localStorage.getItem('fnz_sync_key') || '';
+  openModal('modal-sync-setup');
+  // Pequeño delay para que el modal esté visible antes de pedir foco
+  setTimeout(() => { if(inp) inp.focus(); }, 150);
+}
+
+function saveModalSyncKey() {
+  const val = document.getElementById('modal-sync-key-input')?.value.trim();
+  if (!val) { shake('modal-sync-setup'); return; }
+  localStorage.setItem('fnz_sync_key', val);
+  _lastSyncTs = 0;
+  localStorage.setItem('fnz_last_sync_ts', '0');
+  closeModal('modal-sync-setup');
+  document.getElementById('home-setup-banner').style.display = 'none';
+  showToast('Clave guardada — cargando datos…');
+  startSyncPolling();
+  loadFromServer({ force: true });
+}
+
 let transactions = load(STORE_KEYS.tx,[]);
 let expectedIncome = load(STORE_KEYS.exp,[]);
 let subscriptions = load(STORE_KEYS.sub,[]);
@@ -1640,16 +1679,10 @@ function renderHome(){
     </div>`;
   }).join('');
 
-  // Banner setup (HTML estático — solo show/hide)
+  // Banner setup — solo show/hide
   const setupBanner = document.getElementById('home-setup-banner');
   if(setupBanner){
-    const hasSyncKey = !!localStorage.getItem('fnz_sync_key');
-    setupBanner.style.display = hasSyncKey ? 'none' : 'block';
-    // Limpiar campo si se volvió a mostrar
-    if(!hasSyncKey){
-      const inp = document.getElementById('quick-sync-key');
-      if(inp && !inp.value) inp.value = '';
-    }
+    setupBanner.style.display = localStorage.getItem('fnz_sync_key') ? 'none' : 'block';
   }
 
   document.getElementById('home-stats').innerHTML = `
