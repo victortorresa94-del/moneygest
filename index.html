@@ -426,22 +426,24 @@ input[type="date"]{cursor:pointer}
 .home-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .home-stat-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);cursor:pointer;transition:box-shadow .15s}
 .home-stat-card:hover{box-shadow:var(--shadow)}
-.home-stat-card.full{grid-column:1/-1}
+.home-stat-card.full{grid-column:1/-1;background:linear-gradient(140deg,#0D0D1A 0%,#1a1040 55%,#0f2040 100%);color:#fff;position:relative;overflow:hidden}
+.home-stat-card.full::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(120,100,255,.28) 0%,transparent 70%);pointer-events:none}
+.home-stat-card.full::after{content:'';position:absolute;bottom:-40px;left:-20px;width:160px;height:160px;background:radial-gradient(circle,rgba(0,168,107,.14) 0%,transparent 70%);pointer-events:none}
 .home-stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:10px}
+.home-stat-card.full .home-stat-label{color:rgba(255,255,255,.55)}
 .home-stat-value{font-size:26px;font-weight:800;letter-spacing:-1.2px;line-height:1}
 .home-stat-value.patrimonio{font-size:34px}
-.home-stat-value.patrimonio.patriok{color:var(--accent)}
+.home-stat-value.patrimonio.patriok{color:#9EFF9E}
+.home-stat-card.full .home-stat-sub{color:rgba(255,255,255,.45)}
 .home-stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+.sub-section-header{grid-column:1/-1;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:10px 4px 6px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);margin-bottom:2px}
 /* ── HOME DESKTOP LAYOUT ── */
 @media(min-width:768px){
   .home-stat-card.full{
-    background:linear-gradient(135deg,var(--accent) 0%,#3a38c4 100%);
     padding:32px 36px;
   }
-  .home-stat-card.full .home-stat-label{color:rgba(255,255,255,.6)}
   .home-stat-card.full .home-stat-value.patrimonio{font-size:54px}
-  .home-stat-card.full .home-stat-value.patrimonio.patriok{color:#fff}
-  .home-stat-card.full .home-stat-sub{color:rgba(255,255,255,.5)}
+  .home-stat-card.full .home-stat-value.patrimonio.patriok{color:#9EFF9E}
   .home-patrimonio-breakdown{
     display:flex;gap:20px;margin-top:20px;padding-top:18px;
     border-top:1px solid rgba(255,255,255,.15);flex-wrap:wrap;
@@ -684,10 +686,16 @@ input[type="date"]{cursor:pointer}
         Añadir
       </button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:18px" id="sub-filters">
-      <div class="chip active" data-filter="active" onclick="setSubFilter('active',this)">Activas</div>
-      <div class="chip" data-filter="inactive" onclick="setSubFilter('inactive',this)">Pausadas</div>
-      <div class="chip" data-filter="all" onclick="setSubFilter('all',this)">Todas</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <div style="display:flex;gap:6px" id="sub-filters">
+        <div class="chip active" onclick="setSubFilter('active',this)">Activas</div>
+        <div class="chip" onclick="setSubFilter('inactive',this)">Pausadas</div>
+        <div class="chip" onclick="setSubFilter('all',this)">Todas</div>
+      </div>
+      <div style="display:flex;gap:6px" id="sub-view-btns">
+        <div class="chip active" onclick="setSubView('fecha',this)">📅 Por fecha</div>
+        <div class="chip" onclick="setSubView('categoria',this)">🏷️ Por categoría</div>
+      </div>
     </div>
     <div class="subs-grid" id="subs-grid"></div>
   </div>
@@ -1509,24 +1517,41 @@ function txInMonth(tx, y, m){
 function renderHome(){
   const now = new Date();
   const y = now.getFullYear(), m = now.getMonth();
+  const todayDay = now.getDate();
   const h = now.getHours();
   const greeting = h < 13 ? 'Buenos días 👋' : h < 20 ? 'Buenas tardes 👋' : 'Buenas noches 👋';
   document.getElementById('home-greeting').textContent = greeting;
   document.getElementById('home-period').textContent = monthLabel(y, m);
 
+  // ── Patrimonio (acumulado total) ──
   const savingsExternal = savings.filter(sv=>!sv.fromIncome).reduce((s,sv)=>s+sv.amount,0);
   const allIncome = transactions.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
   const allExpense = transactions.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
   const patrimonio = savingsExternal + allIncome - allExpense;
 
+  // ── Este mes ──
+  const txMes = transactions.filter(t=>{
+    const d=new Date(t.date+'T12:00:00');
+    return d.getFullYear()===y && d.getMonth()===m;
+  });
+  const ingresosEsteMes = txMes.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const gastosEsteMes = txMes.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const balanceMes = ingresosEsteMes - gastosEsteMes;
+
+  // ── Pagos pendientes (facturas + recurrentes que vencen este mes) ──
   const pendingBillsList = bills.filter(b=>{
     if(b.status!=='pending') return false;
     if(!b.dueDate) return true;
     const d=new Date(b.dueDate+'T12:00:00');
     return d.getFullYear()===y && d.getMonth()===m;
   });
-  const pagosPendientes = pendingBillsList.reduce((s,b)=>s+b.amount,0);
+  // Subscripciones mensuales que aún no han vencido este mes
+  const subsThisMonthPending = subscriptions.filter(s=>s.active && s.cycle==='monthly' && s.day>=todayDay);
+  const pagosPendientes = pendingBillsList.reduce((s,b)=>s+b.amount,0)
+    + subsThisMonthPending.reduce((s,sub)=>s+sub.amount,0);
+  const totalPagosPendientesCount = pendingBillsList.length + subsThisMonthPending.length;
 
+  // ── Ingresos pendientes ──
   const pendingIncomeList = expectedIncome.filter(e=>{
     if(e.status!=='pending'&&e.status!=='overdue') return false;
     if(!e.expectedDate) return true;
@@ -1535,10 +1560,7 @@ function renderHome(){
   });
   const ingresosPendientes = pendingIncomeList.reduce((s,e)=>s+e.amount,0);
 
-  // Active recurring payments sorted by proximity
-  const activeSubs = subscriptions.filter(s=>s.active).sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
-
-  // Mini-list renderers
+  // ── Listas mini ──
   const billMiniRows = pendingBillsList.slice(0,3).map(b=>{
     const due = billDueInfo(b.dueDate,b.status);
     return `<div class="home-mini-row">
@@ -1551,7 +1573,7 @@ function renderHome(){
     </div>`;
   }).join('');
 
-  const subMiniRows = activeSubs.slice(0,3).map(s=>{
+  const subPendingRows = subsThisMonthPending.slice(0,4).map(s=>{
     const d=daysUntil(s.day);
     const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';
     const dlabel=d===0?'Hoy':d===1?'Mañana':`${d}d`;
@@ -1580,12 +1602,29 @@ function renderHome(){
     </div>`;
   }).join('');
 
-  const monthlyRecurring = activeSubs.reduce((s,sub)=>{
-    const r={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};
-    return s+sub.amount*(r[sub.cycle]||1);
-  },0);
+  // Últimas transacciones del mes
+  const recentInc = txMes.filter(t=>t.type==='income').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
+  const recentExp = txMes.filter(t=>t.type==='expense').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
+  const incMesRows = recentInc.map(t=>{
+    const cat=getCat(t.type,t.category);
+    return `<div class="home-mini-row">
+      <div class="home-mini-left"><div class="home-mini-icon">${cat.emoji}</div>
+        <div><div class="home-mini-name">${t.description}</div>
+          <div class="home-mini-meta">${fmtDate(t.date)}</div></div></div>
+      <span class="home-mini-amt c-income">+${fmt(t.amount)}</span>
+    </div>`;
+  }).join('');
+  const expMesRows = recentExp.map(t=>{
+    const cat=getCat(t.type,t.category);
+    return `<div class="home-mini-row">
+      <div class="home-mini-left"><div class="home-mini-icon">${cat.emoji}</div>
+        <div><div class="home-mini-name">${t.description}</div>
+          <div class="home-mini-meta">${fmtDate(t.date)}</div></div></div>
+      <span class="home-mini-amt c-expense">−${fmt(t.amount)}</span>
+    </div>`;
+  }).join('');
 
-  // Banner de configuración si no hay clave de sincronización
+  // Banner setup
   const setupBanner = document.getElementById('home-setup-banner');
   if (setupBanner) {
     const hasSyncKey = !!localStorage.getItem('fnz_sync_key');
@@ -1608,32 +1647,62 @@ function renderHome(){
   }
 
   document.getElementById('home-stats').innerHTML = `
-    <div class="home-stat-card full" onclick="goTo('savings')" style="cursor:pointer">
-      <div class="home-stat-label">Patrimonio total</div>
-      <div class="home-stat-value patrimonio ${patrimonio>=0?'patriok':'c-expense'}">${fmt(patrimonio)}</div>
-      <div class="home-stat-sub">Ahorro + ingresos acumulados · haz clic para ver detalle</div>
+    <!-- ── Patrimonio total ── -->
+    <div class="home-stat-card full" onclick="goTo('savings')" style="cursor:pointer;position:relative">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="min-width:0">
+          <div class="home-stat-label">💰 Patrimonio total</div>
+          <div class="home-stat-value patrimonio ${patrimonio>=0?'patriok':'c-expense'}">${fmt(patrimonio)}</div>
+          <div class="home-stat-sub">Neto acumulado · toca para ver detalle</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-top:2px">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.4);margin-bottom:4px">Este mes</div>
+          <div style="font-size:20px;font-weight:800;color:${balanceMes>=0?'#9EFF9E':'#FF8080'}">${balanceMes>=0?'+':''}${fmt(balanceMes)}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px">${ingresosEsteMes>0?`+${fmt(ingresosEsteMes)} ingresos`:'Sin ingresos'}</div>
+        </div>
+      </div>
       <div class="home-patrimonio-breakdown">
         <div class="pb-item"><div class="pb-label">Ingresos totales</div><div class="pb-val">+${fmt(allIncome)}</div></div>
         <div class="pb-item"><div class="pb-label">Gastos totales</div><div class="pb-val">−${fmt(allExpense)}</div></div>
-        ${savingsExternal>0?`<div class="pb-item"><div class="pb-label">Ahorro ext.</div><div class="pb-val">+${fmt(savingsExternal)}</div></div>`:''}
-        <div class="pb-item"><div class="pb-label">Balance neto</div><div class="pb-val">${patrimonio>=0?'+':''}${fmt(patrimonio)}</div></div>
+        ${savingsExternal>0?`<div class="pb-item"><div class="pb-label">Ahorro/inversiones</div><div class="pb-val">+${fmt(savingsExternal)}</div></div>`:''}
+        <div class="pb-item"><div class="pb-label">Balance neto</div><div class="pb-val" style="color:${patrimonio>=0?'#9EFF9E':'#FF8080'}">${patrimonio>=0?'+':''}${fmt(patrimonio)}</div></div>
       </div>
     </div>
-    <div class="home-stat-card" onclick="goTo('gastos')" style="cursor:pointer">
-      <div class="home-stat-label">Pagos pendientes</div>
-      <div class="home-stat-value ${pagosPendientes>0?'c-expense':''}">${fmt(pagosPendientes)}</div>
-      <div class="home-stat-sub">${pendingBillsList.length} pago${pendingBillsList.length!==1?'s':''} este mes</div>
-      ${pendingBillsList.length?`<div class="home-mini-list">${billMiniRows}</div>`:''}
-      ${activeSubs.length?`<div class="home-mini-list">
-        <div class="home-mini-divider">Pagos recurrentes · ${fmt(monthlyRecurring)}/mes</div>
-        ${subMiniRows}
-      </div>`:''}
-    </div>
+
+    <!-- ── Ingresos este mes ── -->
     <div class="home-stat-card" onclick="goTo('ingresos')" style="cursor:pointer">
-      <div class="home-stat-label">Ingresos pendientes</div>
+      <div class="home-stat-label">📈 Ingresos este mes</div>
+      <div class="home-stat-value ${ingresosEsteMes>0?'c-income':''}">${fmt(ingresosEsteMes)}</div>
+      <div class="home-stat-sub">${recentInc.length} transacción${recentInc.length!==1?'es':''}</div>
+      ${recentInc.length?`<div class="home-mini-list">${incMesRows}</div>`:'<div class="home-mini-list" style="margin-top:14px"><div style="padding:12px;text-align:center;color:var(--muted);font-size:12px">Sin ingresos este mes</div></div>'}
+    </div>
+
+    <!-- ── Gastos este mes ── -->
+    <div class="home-stat-card" onclick="goTo('gastos')" style="cursor:pointer">
+      <div class="home-stat-label">📉 Gastos este mes</div>
+      <div class="home-stat-value ${gastosEsteMes>0?'c-expense':''}">${fmt(gastosEsteMes)}</div>
+      <div class="home-stat-sub">${recentExp.length} transacción${recentExp.length!==1?'es':''}</div>
+      ${recentExp.length?`<div class="home-mini-list">${expMesRows}</div>`:'<div class="home-mini-list" style="margin-top:14px"><div style="padding:12px;text-align:center;color:var(--muted);font-size:12px">Sin gastos este mes</div></div>'}
+    </div>
+
+    <!-- ── Pagos pendientes (facturas + recurrentes) ── -->
+    <div class="home-stat-card" onclick="goTo('bills')" style="cursor:pointer">
+      <div class="home-stat-label">⏰ Pagos pendientes</div>
+      <div class="home-stat-value ${pagosPendientes>0?'c-expense':''}">${fmt(pagosPendientes)}</div>
+      <div class="home-stat-sub">${totalPagosPendientesCount} pago${totalPagosPendientesCount!==1?'s':''} pendientes este mes</div>
+      ${billMiniRows?`<div class="home-mini-list">${billMiniRows}</div>`:''}
+      ${subPendingRows?`<div class="home-mini-list">
+        <div class="home-mini-divider">Recurrentes este mes</div>
+        ${subPendingRows}
+      </div>`:(totalPagosPendientesCount===0?'<div class="home-mini-list" style="margin-top:14px"><div style="padding:12px;text-align:center;color:var(--muted);font-size:12px">Sin pagos pendientes ✓</div></div>':'')}
+    </div>
+
+    <!-- ── Ingresos pendientes ── -->
+    <div class="home-stat-card" onclick="goTo('ingresos')" style="cursor:pointer">
+      <div class="home-stat-label">🕐 Ingresos pendientes</div>
       <div class="home-stat-value ${ingresosPendientes>0?'c-income':''}">${fmt(ingresosPendientes)}</div>
       <div class="home-stat-sub">${pendingIncomeList.length} por cobrar</div>
-      ${pendingIncomeList.length?`<div class="home-mini-list">${incomeMiniRows}</div>`:'<div class="home-mini-list" style="margin-top:14px"><div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">Sin ingresos pendientes ✓</div></div>'}
+      ${pendingIncomeList.length?`<div class="home-mini-list">${incomeMiniRows}</div>`:'<div class="home-mini-list" style="margin-top:14px"><div style="padding:12px;text-align:center;color:var(--muted);font-size:12px">Sin ingresos pendientes ✓</div></div>'}
     </div>
   `;
 }
@@ -2051,6 +2120,7 @@ function deleteExp(id){
 //  SUBSCRIPTIONS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let subFilter = 'active';
+let subView = 'fecha';
 let editingSubId = null;
 
 function setSubFilter(f,el){
@@ -2060,25 +2130,31 @@ function setSubFilter(f,el){
   renderSubscriptions();
 }
 
+function setSubView(v,el){
+  subView=v;
+  document.querySelectorAll('#sub-view-btns .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderSubscriptions();
+}
+
 function renderSubscriptions(){
   let list = [...subscriptions];
   if(subFilter==='active') list=list.filter(s=>s.active);
   else if(subFilter==='inactive') list=list.filter(s=>!s.active);
-  list.sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
 
   const monthlyTotal = subscriptions.filter(s=>s.active).reduce((sum,s)=>{
-    const monthly={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};
-    return sum+s.amount*(monthly[s.cycle]||1);
+    const r={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};
+    return sum+s.amount*(r[s.cycle]||1);
   },0);
   document.getElementById('sub-total').textContent = `${fmt(monthlyTotal)}/mes en pagos recurrentes activos`;
 
   const cycleLabel={monthly:'Mensual',annual:'Anual',weekly:'Semanal',quarterly:'Trimestral'};
 
-  document.getElementById('subs-grid').innerHTML = list.length ? list.map(s=>{
+  const cardHtml = s => {
     const d=daysUntil(s.day);
     const cls=d<=3?'days-today':d<=7?'days-soon':'days-ok';
     const dlabel=d===0?'Hoy':d===1?'Mañana':`${d}d`;
-    const daysBadge=s.active?' · <span class="days-badge '+cls+'">'+dlabel+'</span>':' · Pausada';
+    const daysBadge=s.active?` · <span class="days-badge ${cls}">${dlabel}</span>`:' · Pausada';
     return `<div class="sub-card ${s.active?'':'sub-inactive'}">
       <div class="sub-icon">${s.emoji||'📦'}</div>
       <div class="sub-info">
@@ -2104,7 +2180,55 @@ function renderSubscriptions(){
         </button>
       </div>
     </div>`;
-  }).join('') : '<div class="empty-state" style="grid-column:1/-1"><div class="e-icon">🔄</div><p>No hay pagos recurrentes</p></div>';
+  };
+
+  if(!list.length){
+    document.getElementById('subs-grid').innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="e-icon">🔄</div><p>No hay pagos recurrentes</p></div>';
+    return;
+  }
+
+  if(subView==='fecha'){
+    const todayDay = new Date().getDate();
+    const monthly = list.filter(s=>s.cycle==='monthly').sort((a,b)=>daysUntil(a.day)-daysUntil(b.day));
+    const others = list.filter(s=>s.cycle!=='monthly').sort((a,b)=>a.name.localeCompare(b.name));
+    // Este mes = vence hoy o en los próximos días (day >= hoy)
+    // Próximo mes = ya pasó este mes (day < hoy)
+    const estesMes = monthly.filter(s=>s.day>=todayDay);
+    const proxMes = monthly.filter(s=>s.day<todayDay);
+
+    let html='';
+    if(estesMes.length){
+      html+=`<div class="sub-section-header" style="grid-column:1/-1"><span>📅 Este mes</span><span>${fmt(estesMes.reduce((s,x)=>s+x.amount,0))}</span></div>`;
+      html+=estesMes.map(cardHtml).join('');
+    }
+    if(proxMes.length){
+      html+=`<div class="sub-section-header" style="grid-column:1/-1"><span>➜ Próximo mes</span><span>${fmt(proxMes.reduce((s,x)=>s+x.amount,0))}</span></div>`;
+      html+=proxMes.map(cardHtml).join('');
+    }
+    if(others.length){
+      const othersMonthly = others.reduce((s,x)=>{const r={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};return s+x.amount*(r[x.cycle]||1);},0);
+      html+=`<div class="sub-section-header" style="grid-column:1/-1"><span>🔄 Otros ciclos</span><span>${fmt(othersMonthly)}/mes</span></div>`;
+      html+=others.map(cardHtml).join('');
+    }
+    document.getElementById('subs-grid').innerHTML=html;
+  } else {
+    // Vista por categoría
+    const groups={};
+    list.forEach(s=>{
+      const cat=getCat('expense',s.category);
+      const key=s.category||'__none__';
+      if(!groups[key]) groups[key]={cat,items:[],total:0};
+      groups[key].items.push(s);
+      const r={monthly:1,quarterly:1/3,annual:1/12,weekly:4.33};
+      groups[key].total+=s.amount*(r[s.cycle]||1);
+    });
+    let html='';
+    Object.values(groups).sort((a,b)=>b.total-a.total).forEach(g=>{
+      html+=`<div class="sub-section-header" style="grid-column:1/-1"><span>${g.cat.emoji} ${g.cat.name}</span><span>${fmt(g.total)}/mes · ${g.items.length} pago${g.items.length!==1?'s':''}</span></div>`;
+      html+=g.items.map(cardHtml).join('');
+    });
+    document.getElementById('subs-grid').innerHTML=html;
+  }
 }
 
 function openSubModal(id){
