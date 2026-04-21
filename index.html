@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Finanzas</title>
+<title>MoneyGest</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="logo.png" type="image/png">
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Finanzas">
-<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-title" content="MoneyGest">
+<link rel="apple-touch-icon" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -493,7 +494,7 @@ input[type="date"]{cursor:pointer}
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
-  <div class="logo"><div class="logo-dot"><img src="icon.svg" alt="logo"></div><span>MoneyGest</span></div>
+  <div class="logo"><div class="logo-dot"><img src="logo.png" alt="logo"></div><span>MoneyGest</span></div>
   <div class="nav-section">Principal</div>
   <div class="nav-item active" onclick="goTo('home')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -523,6 +524,10 @@ input[type="date"]{cursor:pointer}
   <div class="nav-item" onclick="goTo('invoices')" id="nav-invoices">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
     <span>Facturas</span>
+  </div>
+  <div class="nav-item" onclick="goTo('fiscal')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h4M7 12h10"/></svg>
+    <span>Fiscal</span>
   </div>
   <div class="nav-item" onclick="goTo('data')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -810,6 +815,35 @@ input[type="date"]{cursor:pointer}
     <div id="data-msg" style="margin-top:20px;max-width:760px"></div>
   </div>
 
+  <!-- ── FISCAL ── -->
+  <div id="page-fiscal" class="page">
+    <div class="page-header" style="flex-wrap:wrap;gap:12px">
+      <div><div class="page-title">🧾 Fiscal</div><div class="page-sub" id="fiscal-deadline-label">Impuestos y obligaciones fiscales</div></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="fiscal-q-sel" class="btn btn-ghost" style="padding:6px 10px;font-size:13px" onchange="renderFiscal()">
+          <option value="1">Q1 · Ene-Mar</option>
+          <option value="2">Q2 · Abr-Jun</option>
+          <option value="3">Q3 · Jul-Sep</option>
+          <option value="4">Q4 · Oct-Dic</option>
+        </select>
+        <select id="fiscal-y-sel" class="btn btn-ghost" style="padding:6px 10px;font-size:13px" onchange="renderFiscal()"></select>
+      </div>
+    </div>
+
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px" id="fiscal-kpis"></div>
+
+    <!-- Detail grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div id="fiscal-iva-card" class="card"></div>
+      <div id="fiscal-irpf-card" class="card"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div id="fiscal-deducibles-card" class="card"></div>
+      <div id="fiscal-autonomo-card" class="card"></div>
+    </div>
+  </div>
+
   <!-- ── FACTURAS (EMPRESA) ── -->
   <div id="page-invoices" class="page">
     <div class="page-header">
@@ -852,12 +886,21 @@ input[type="date"]{cursor:pointer}
       <div class="form-group"><label>Fecha</label><input type="date" id="tx-date"></div>
       <div class="form-group"><label>Nota (opcional)</label><textarea id="tx-note" placeholder="Información adicional..."></textarea></div>
     </div>
-    <div id="doc-extract-status-tx" style="display:none;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--muted);margin-bottom:8px;display:none;align-items:center;gap:8px"></div>
+    <div id="deductible-row" class="form-group full" style="display:none;margin:0 0 12px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500">
+        <input type="checkbox" id="tx-deductible" style="width:16px;height:16px;accent-color:var(--accent)">
+        Gasto deducible (Fiscal / IRPF)
+      </label>
+    </div>
+    <div id="tx-attachment-preview" style="display:none;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:12px;margin-bottom:8px;align-items:center;gap:8px;justify-content:space-between">
+      <span id="tx-attachment-name" style="color:var(--text)">📎 documento adjunto</span>
+      <button onclick="removeTxAttachment()" style="background:none;border:none;color:var(--expense);cursor:pointer;font-size:16px">×</button>
+    </div>
     <div class="modal-actions" style="flex-wrap:wrap;gap:8px">
-      <label class="btn btn-ghost" style="cursor:pointer;gap:6px;font-size:13px" title="Sube un ticket o factura y la IA rellenará los campos automáticamente">
+      <label class="btn btn-ghost" style="cursor:pointer;gap:6px;font-size:13px" title="Adjuntar ticket, recibo o factura">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        Subir ticket/doc
-        <input type="file" accept="image/*,.pdf,application/pdf" style="display:none" onchange="extractAndFill(this.files[0],'tx')">
+        📎 Adjuntar doc
+        <input type="file" accept="image/*,.pdf,application/pdf" style="display:none" onchange="attachDoc(this.files[0],'tx')">
       </label>
       <button class="btn btn-ghost" onclick="closeModal('modal-tx')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveTx()">Guardar</button>
@@ -1110,12 +1153,15 @@ input[type="date"]{cursor:pointer}
       </div>
       <div class="form-group full"><label>Descripción (opcional)</label><textarea id="inv-desc" placeholder="Servicios de desarrollo web..."></textarea></div>
     </div>
-    <div id="doc-extract-status-inv" style="display:none;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--muted);margin-bottom:8px;align-items:center;gap:8px"></div>
+    <div id="inv-attachment-preview" style="display:none;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:12px;margin-bottom:8px;align-items:center;gap:8px;justify-content:space-between">
+      <span id="inv-attachment-name" style="color:var(--text)">📎 documento adjunto</span>
+      <button onclick="removeInvAttachment()" style="background:none;border:none;color:var(--expense);cursor:pointer;font-size:16px">×</button>
+    </div>
     <div class="modal-actions" style="flex-wrap:wrap;gap:8px">
-      <label class="btn btn-ghost" style="cursor:pointer;gap:6px;font-size:13px" title="Sube la factura en PDF o imagen y la IA extraerá los datos automáticamente">
+      <label class="btn btn-ghost" style="cursor:pointer;gap:6px;font-size:13px" title="Adjuntar la factura PDF o imagen">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        Subir factura
-        <input type="file" accept="image/*,.pdf,application/pdf" style="display:none" onchange="extractAndFill(this.files[0],'invoice')">
+        📎 Adjuntar factura
+        <input type="file" accept="image/*,.pdf,application/pdf" style="display:none" onchange="attachDoc(this.files[0],'invoice')">
       </label>
       <button class="btn btn-ghost" onclick="closeModal('modal-invoice')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveInvoice()">Guardar factura</button>
@@ -1483,6 +1529,7 @@ function renderPage(p){
   else if(p==='savings') renderSavings();
   else if(p==='data') renderDataPage();
   else if(p==='invoices') renderInvoices();
+  else if(p==='fiscal') renderFiscal();
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1790,7 +1837,7 @@ function txRow(t, editable=true){
   return `<div class="tx-row">
     <div class="tx-icon c-${t.type}">${cat.emoji}</div>
     <div class="tx-info">
-      <div class="tx-name">${t.description||'Sin descripción'}${t.attachment?'<span style="font-size:10px;margin-left:4px;opacity:.6" title="Tiene adjunto">📎</span>':''}</div>
+      <div class="tx-name">${t.description||'Sin descripción'}${t.attachment?`<span style="font-size:10px;margin-left:4px;cursor:pointer;opacity:.7" title="Ver adjunto" onclick="viewAttachment(transactions.find(x=>x.id==='${t.id}')?.attachment)">📎</span>`:''}</div>
       <div class="tx-meta">${fmtDate(t.date)} · <span class="tag">${cat.name}</span></div>
     </div>
     <div class="tx-right">
@@ -1839,10 +1886,15 @@ function openTxModal(id, forceType){
     document.getElementById('tx-date').value=today();
     document.getElementById('tx-note').value='';
   }
-  // Reset doc extraction state
-  window._pendingAttachment = null;
-  const statusTx = document.getElementById('doc-extract-status-tx');
-  if(statusTx){ statusTx.style.display='none'; statusTx.innerHTML=''; }
+  // Reset attachment state
+  window._pendingAttachment = t?.attachment || null;
+  const prevTx = document.getElementById('tx-attachment-preview');
+  if(prevTx) prevTx.style.display = (t?.attachment) ? 'flex' : 'none';
+  const nameTx = document.getElementById('tx-attachment-name');
+  if(nameTx && t?.attachment) nameTx.textContent = '📎 documento adjunto';
+  const deductEl = document.getElementById('tx-deductible');
+  if(deductEl) deductEl.checked = t?.deductible || false;
+  updateDeductibleRow();
   openModal('modal-tx');
 }
 
@@ -1850,12 +1902,19 @@ function setTxType(type){
   currentTxType=type;
   updateTxTypeUI();
   populateCatSelect('tx-cat',type);
+  updateDeductibleRow();
 }
 
 function setTxProfile(profile){
   currentTxProfile=profile;
   updateTxProfileUI();
   populateCatSelect('tx-cat',currentTxType);
+  updateDeductibleRow();
+}
+
+function updateDeductibleRow(){
+  const row = document.getElementById('deductible-row');
+  if(row) row.style.display = (currentTxType==='expense') ? 'block' : 'none';
 }
 
 function updateTxTypeUI(){
@@ -1875,14 +1934,15 @@ function saveTx(){
   const date=document.getElementById('tx-date').value;
   const note=document.getElementById('tx-note').value.trim();
   if(!desc||!amount||!date){shake('modal-tx');return;}
+  const deductible = currentTxType==='expense' && (document.getElementById('tx-deductible')?.checked || false);
   const attachment = window._pendingAttachment || null;
   window._pendingAttachment = null;
   if(editingTxId){
     const t=transactions.find(x=>x.id===editingTxId);
-    Object.assign(t,{type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile});
+    Object.assign(t,{type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile,deductible});
     if(attachment) t.attachment=attachment;
   } else {
-    const obj={id:uid(),type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile};
+    const obj={id:uid(),type:currentTxType,description:desc,amount,category:cat,date,note,profile:currentTxProfile,deductible};
     if(attachment) obj.attachment=attachment;
     transactions.unshift(obj);
   }
@@ -2638,6 +2698,10 @@ function renderMoreDrawer() {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Facturas
     </div>
+    <div class="more-item" onclick="goTo('fiscal');closeMore()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h4M7 12h10"/></svg>
+      Fiscal
+    </div>
     <div class="more-item" onclick="goTo('categories');closeMore()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 6h16M4 12h8m-8 6h12"/></svg>
       Categorías
@@ -2886,101 +2950,210 @@ function saveAiApiKey() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  DOCUMENT EXTRACTION (IA)
+//  DOCUMENT ATTACHMENT (repositorio de docs)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function extractAndFill(file, context) {
+async function attachDoc(file, context) {
   if (!file) return;
-  const apiKey = localStorage.getItem('fnz_openrouter_key');
-  if (!apiKey) { showToast('⚠️ Configura tu API key en Datos → Asistente IA'); return; }
-
-  const statusEl = document.getElementById(context==='tx' ? 'doc-extract-status-tx' : 'doc-extract-status-inv');
-  statusEl.style.display = 'flex';
-  statusEl.innerHTML = '⏳ Analizando documento…';
-
+  if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Archivo demasiado grande (máx 2 MB)'); return; }
   try {
-    // Convert file to base64 data URL
     const b64 = await new Promise((resolve, reject) => {
       const r = new FileReader();
       r.onload = e => resolve(e.target.result);
       r.onerror = reject;
       r.readAsDataURL(file);
     });
-
-    const isInvoice = context === 'invoice';
-    const prompt = isInvoice
-      ? 'Extrae los datos de esta factura. Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown: {"client":"nombre del cliente o empresa","number":"número de factura o vacío","date":"YYYY-MM-DD","base":importe_base_sin_iva,"iva":porcentaje_iva_numerico,"total":importe_total,"desc":"descripción del concepto o servicio"}'
-      : 'Extrae los datos de este ticket o recibo. Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown: {"description":"nombre del comercio o servicio","amount":importe_total_numerico,"date":"YYYY-MM-DD","category":"categoría probable en español como Alimentación/Transporte/Ocio/Salud/Software/Restaurante/etc","note":"nota opcional"}';
-
-    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': location.origin
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-pro-preview-05-06',
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image_url', image_url: { url: b64 } },
-            { type: 'text', text: prompt }
-          ]
-        }],
-        temperature: 0.1
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(()=>({}));
-      throw new Error(err?.error?.message || `Error ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    const raw = data.choices?.[0]?.message?.content || '';
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No se pudo leer la respuesta');
-    const parsed = JSON.parse(jsonMatch[0]);
-
-    if (isInvoice) {
-      if (parsed.client) document.getElementById('inv-client').value = parsed.client;
-      if (parsed.number) document.getElementById('inv-num').value = parsed.number;
-      if (parsed.date) document.getElementById('inv-date').value = parsed.date;
-      if (parsed.base) { document.getElementById('inv-base').value = parsed.base; calcInvTotal(); }
-      if (parsed.iva != null) {
-        const ivaEl = document.getElementById('inv-iva');
-        const opt = [...ivaEl.options].find(o => parseFloat(o.value) === parseFloat(parsed.iva));
-        if (opt) { ivaEl.value = opt.value; calcInvTotal(); }
-      }
-      if (parsed.desc) document.getElementById('inv-desc').value = parsed.desc;
-      statusEl.innerHTML = '✅ Datos extraídos · revisa y ajusta si es necesario';
+    window._pendingAttachment = b64;
+    if (context === 'tx') {
+      const prev = document.getElementById('tx-attachment-preview');
+      const name = document.getElementById('tx-attachment-name');
+      if(prev) prev.style.display = 'flex';
+      if(name) name.textContent = `📎 ${file.name}`;
     } else {
-      if (parsed.description) document.getElementById('tx-desc').value = parsed.description;
-      if (parsed.amount) document.getElementById('tx-amount').value = parsed.amount;
-      if (parsed.date) document.getElementById('tx-date').value = parsed.date;
-      if (parsed.note) document.getElementById('tx-note').value = parsed.note;
-      // Match category by name
-      if (parsed.category) {
-        const cats = getCatsForProfile(currentTxProfile);
-        const typeArr = cats[currentTxType] || [];
-        const match = typeArr.find(c => c.name.toLowerCase().includes(parsed.category.toLowerCase()) || parsed.category.toLowerCase().includes(c.name.toLowerCase()));
-        if (match) document.getElementById('tx-cat').value = match.id;
-      }
-      statusEl.innerHTML = '✅ Datos extraídos · revisa y ajusta si es necesario';
+      const prev = document.getElementById('inv-attachment-preview');
+      const name = document.getElementById('inv-attachment-name');
+      if(prev) prev.style.display = 'flex';
+      if(name) name.textContent = `📎 ${file.name}`;
     }
+    showToast('Documento adjunto ✓');
+  } catch(e) { showToast('Error al adjuntar: ' + e.message); }
+}
 
-    // Save attachment if small enough (<= 400KB)
-    if (file.size <= 400 * 1024) {
-      window._pendingAttachment = b64;
-    } else {
-      window._pendingAttachment = null;
-    }
+function removeTxAttachment() {
+  window._pendingAttachment = null;
+  const prev = document.getElementById('tx-attachment-preview');
+  if(prev) prev.style.display = 'none';
+}
 
-    showToast('Documento analizado ✓');
-  } catch(e) {
-    statusEl.innerHTML = `❌ Error: ${e.message}`;
-    showToast('Error al analizar: ' + e.message);
+function removeInvAttachment() {
+  window._pendingAttachment = null;
+  const prev = document.getElementById('inv-attachment-preview');
+  if(prev) prev.style.display = 'none';
+}
+
+function viewAttachment(b64) {
+  if (!b64) return;
+  const w = window.open();
+  if (b64.startsWith('data:application/pdf')) {
+    w.document.write(`<iframe src="${b64}" style="width:100%;height:100vh;border:none"></iframe>`);
+  } else {
+    w.document.write(`<img src="${b64}" style="max-width:100%;height:auto">`);
   }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  FISCAL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderFiscal() {
+  const now = new Date();
+  const curQ = Math.floor(now.getMonth() / 3) + 1;
+  const curY = now.getFullYear();
+
+  // Populate year selector on first run
+  const ySel = document.getElementById('fiscal-y-sel');
+  if (ySel && !ySel.options.length) {
+    for (let y = curY - 2; y <= curY + 1; y++) {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      if (y === curY) opt.selected = true;
+      ySel.appendChild(opt);
+    }
+  }
+  const qSel = document.getElementById('fiscal-q-sel');
+  if (qSel && !qSel.dataset.init) {
+    qSel.value = curQ;
+    qSel.dataset.init = '1';
+  }
+
+  const q = parseInt(document.getElementById('fiscal-q-sel')?.value || curQ);
+  const y = parseInt(document.getElementById('fiscal-y-sel')?.value || curY);
+  const qMonths = { 1:[0,1,2], 2:[3,4,5], 3:[6,7,8], 4:[9,10,11] };
+  const months = qMonths[q];
+  const deadlines = { 1:`20 Abr ${y}`, 2:`20 Jul ${y}`, 3:`20 Oct ${y}`, 4:`20 Ene ${y+1}` };
+  const mNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const qLabel = `Q${q} ${y} · ${mNames[months[0]]}-${mNames[months[2]]} · Declaración: ${deadlines[q]}`;
+  const dlEl = document.getElementById('fiscal-deadline-label');
+  if (dlEl) dlEl.textContent = qLabel;
+
+  // ── Facturas del trimestre
+  const qInv = invoices.filter(inv => {
+    const d = new Date(inv.date + 'T12:00:00');
+    return d.getFullYear() === y && months.includes(d.getMonth());
+  });
+  const ivaRepercutido = qInv.reduce((s, inv) => s + (inv.ivaAmt || 0), 0);
+  const irpfRetenido   = qInv.reduce((s, inv) => s + (inv.irpfAmt || 0), 0);
+  const baseIngresos   = qInv.reduce((s, inv) => s + (inv.base    || 0), 0);
+
+  // ── Gastos deducibles del trimestre
+  const qDeduct = transactions.filter(t => {
+    if (t.type !== 'expense' || !t.deductible) return false;
+    const d = new Date(t.date + 'T12:00:00');
+    return d.getFullYear() === y && months.includes(d.getMonth());
+  });
+  const totalDeducibles = qDeduct.reduce((s, t) => s + t.amount, 0);
+
+  // IVA soportado: extraemos el IVA del gasto (asumimos 21% incluido en el precio)
+  const ivaSoportado = qDeduct.reduce((s, t) => {
+    const pct = t.iva_pct ?? 21;
+    if (pct === 0) return s;
+    return s + (t.amount / (1 + pct / 100)) * (pct / 100);
+  }, 0);
+
+  // ── IVA balance
+  const ivaBalance = ivaRepercutido - ivaSoportado;
+
+  // ── Modelo 130
+  const rendNeto   = Math.max(0, baseIngresos - totalDeducibles);
+  const provision  = rendNeto * 0.20;
+  const modelo130  = Math.max(0, provision - irpfRetenido);
+
+  // ── Caja Hacienda
+  const cajaTotal = ivaBalance + modelo130;
+
+  // ── Cuota autónomo
+  const quotaMensual   = parseFloat(localStorage.getItem('fnz_autonomo_quota') || '0');
+  const quotaTrimestre = quotaMensual * 3;
+
+  // ── KPI cards
+  const kpisEl = document.getElementById('fiscal-kpis');
+  if (kpisEl) kpisEl.innerHTML = `
+    <div class="stat-card" style="border-left:4px solid var(--income)">
+      <div class="stat-label">IVA a ingresar</div>
+      <div class="stat-value ${ivaBalance < 0 ? 'c-income' : 'c-expense'}">${fmt(Math.abs(ivaBalance))}</div>
+      <div class="stat-sub">${ivaBalance < 0 ? '🎉 A tu favor' : 'A pagar Hacienda'} · Modelo 303</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid var(--accent)">
+      <div class="stat-label">IRPF · Modelo 130</div>
+      <div class="stat-value" style="color:var(--accent)">${fmt(modelo130)}</div>
+      <div class="stat-sub">${irpfRetenido > 0 ? `Retenciones: −${fmt(irpfRetenido)}` : 'Sin retenciones de clientes'}</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid #E65100;background:#FFF3E0">
+      <div class="stat-label">🏦 Caja Hacienda</div>
+      <div class="stat-value" style="color:#E65100">${fmt(cajaTotal)}</div>
+      <div class="stat-sub">Reserva este importe — no es tuyo</div>
+    </div>`;
+
+  // ── IVA detail
+  const ivaEl = document.getElementById('fiscal-iva-card');
+  if (ivaEl) ivaEl.innerHTML = `
+    <div class="card-title">🧾 IVA (Modelo 303)</div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">📤</div><div><div class="row-name">IVA repercutido</div><div class="row-meta">${qInv.length} facturas emitidas</div></div></div><div class="row-amount c-income">+${fmt(ivaRepercutido)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">📥</div><div><div class="row-name">IVA soportado</div><div class="row-meta">${qDeduct.length} gastos deducibles (est. 21%)</div></div></div><div class="row-amount" style="color:#1565C0">−${fmt(ivaSoportado)}</div></div>
+    <div class="list-row" style="border-top:2px solid var(--border)"><div class="row-left"><div class="row-icon">⚖️</div><div class="row-name" style="font-weight:700">Balance IVA</div></div><div class="row-amount ${ivaBalance < 0 ? 'c-income' : 'c-expense'}" style="font-size:15px;font-weight:800">${ivaBalance < 0 ? '−' : '+'}${fmt(Math.abs(ivaBalance))}</div></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--muted);line-height:1.6">
+      Presentación: <strong>${deadlines[q]}</strong> · Modelo 303 trimestral
+    </div>`;
+
+  // ── IRPF detail
+  const irpfEl = document.getElementById('fiscal-irpf-card');
+  if (irpfEl) irpfEl.innerHTML = `
+    <div class="card-title">💼 IRPF (Modelo 130)</div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">💰</div><div><div class="row-name">Ingresos (base facturas)</div></div></div><div class="row-amount c-income">${fmt(baseIngresos)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">🧾</div><div><div class="row-name">Gastos deducibles</div></div></div><div class="row-amount c-expense">−${fmt(totalDeducibles)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">📊</div><div><div class="row-name">Rendimiento neto</div></div></div><div class="row-amount">${fmt(rendNeto)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">%</div><div><div class="row-name">Provisión 20%</div></div></div><div class="row-amount">${fmt(provision)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">✂️</div><div><div class="row-name">IRPF retenido clientes</div></div></div><div class="row-amount c-income">−${fmt(irpfRetenido)}</div></div>
+    <div class="list-row" style="border-top:2px solid var(--border)"><div class="row-left"><div class="row-icon">📋</div><div class="row-name" style="font-weight:700">Pago fraccionado</div></div><div class="row-amount c-expense" style="font-size:15px;font-weight:800">${fmt(modelo130)}</div></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--muted)">Presentación: <strong>${deadlines[q]}</strong> · Modelo 130</div>`;
+
+  // ── Gastos deducibles
+  const dedEl = document.getElementById('fiscal-deducibles-card');
+  if (dedEl) {
+    const byCat = {};
+    qDeduct.forEach(t => {
+      const cat = getCat(t.type, t.category);
+      const k = cat.name;
+      byCat[k] = (byCat[k] || { emoji: cat.emoji, total: 0 });
+      byCat[k].total += t.amount;
+    });
+    const rows = Object.entries(byCat).sort((a,b) => b[1].total - a[1].total)
+      .map(([name, v]) => `<div class="list-row"><div class="row-left"><div class="row-icon">${v.emoji}</div><div class="row-name">${name}</div></div><div class="row-amount c-expense">${fmt(v.total)}</div></div>`).join('');
+    dedEl.innerHTML = `
+      <div class="card-title">🧮 Gastos Deducibles</div>
+      ${rows || '<div class="empty-state" style="padding:12px 0"><p>Marca gastos como "deducible" al añadirlos</p></div>'}
+      ${qDeduct.length ? `<div class="list-row" style="border-top:2px solid var(--border)"><div class="row-name" style="font-weight:700">Total deducible</div><div class="row-amount c-expense" style="font-weight:800">${fmt(totalDeducibles)}</div></div>` : ''}`;
+  }
+
+  // ── Cuota autónomo
+  const autoEl = document.getElementById('fiscal-autonomo-card');
+  if (autoEl) autoEl.innerHTML = `
+    <div class="card-title">🏛️ Cuota Autónomo</div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">📅</div><div><div class="row-name">Cuota mensual</div></div></div><div class="row-amount c-expense">${fmt(quotaMensual)}</div></div>
+    <div class="list-row"><div class="row-left"><div class="row-icon">📦</div><div><div class="row-name">Coste trimestral</div></div></div><div class="row-amount c-expense">${fmt(quotaTrimestre)}</div></div>
+    <div class="list-row" style="border-top:2px solid var(--border)"><div class="row-left"><div class="row-icon">🏦</div><div><div class="row-name" style="font-weight:700">Total a apartar este Q</div></div></div><div class="row-amount c-expense" style="font-size:15px;font-weight:800">${fmt(cajaTotal + quotaTrimestre)}</div></div>
+    <div style="margin-top:14px">
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Cuota mensual autónomo (€)</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="autonomo-quota-input" value="${quotaMensual}" min="0" step="0.01" placeholder="Ej: 294.00" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px">
+        <button class="btn btn-primary" style="padding:8px 14px;font-size:13px" onclick="saveAutonomoQuota()">Guardar</button>
+      </div>
+    </div>`;
+}
+
+function saveAutonomoQuota() {
+  const v = parseFloat(document.getElementById('autonomo-quota-input').value) || 0;
+  localStorage.setItem('fnz_autonomo_quota', v);
+  showToast('Cuota guardada ✓');
+  renderFiscal();
 }
 
 renderHome();
@@ -3026,9 +3199,11 @@ function openInvoiceModal(id) {
     document.getElementById('inv-desc').value = '';
   }
   calcInvTotal();
-  window._pendingAttachment = null;
-  const statusInv = document.getElementById('doc-extract-status-inv');
-  if(statusInv){ statusInv.style.display='none'; statusInv.innerHTML=''; }
+  window._pendingAttachment = inv?.attachment || null;
+  const prevInv = document.getElementById('inv-attachment-preview');
+  if(prevInv) prevInv.style.display = (inv?.attachment) ? 'flex' : 'none';
+  const nameInv = document.getElementById('inv-attachment-name');
+  if(nameInv && inv?.attachment) nameInv.textContent = '📎 documento adjunto';
   openModal('modal-invoice');
 }
 
@@ -3126,6 +3301,7 @@ function renderInvoices() {
         <div style="text-align:right;margin-right:8px">
           <div class="row-amount c-income">${fmt(inv.total)}</div>
         </div>
+        ${inv.attachment ? `<button class="btn-icon" onclick="viewAttachment(invoices.find(x=>x.id==='${inv.id}')?.attachment)" title="Ver adjunto">📎</button>` : ''}
         <button class="btn-icon" onclick="openInvoiceModal('${inv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="btn-danger-icon" onclick="deleteInvoice('${inv.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
       </div>
